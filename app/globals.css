@@ -114,14 +114,14 @@ textarea::placeholder {
   gap: 11px;
 }
 .market-monogram {
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--gold);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--gold-deep);
-  font: italic 22px var(--font-display);
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: block;
+  overflow: hidden;
+  color: transparent;
+  font-size: 0;
+  background: url('/sahaan-ss-logo.svg') center/contain no-repeat;
 }
 .market-brand strong,
 .market-brand small {
@@ -260,7 +260,8 @@ textarea::placeholder {
 .form-step label > small,
 .request-form label > small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
+  font-weight: 700;
   line-height: 1.35;
   text-transform: none;
   letter-spacing: 0;
@@ -402,7 +403,8 @@ textarea::placeholder {
   align-items: center;
   gap: 10px;
   color: var(--muted);
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 16px;
   cursor: pointer;
 }
 .service-rail button:last-child {
@@ -411,7 +413,7 @@ textarea::placeholder {
 .service-rail button span {
   color: #b7aa9a;
   font:
-    italic 13px Georgia,
+    italic 14px Georgia,
     serif;
 }
 .service-rail button.active {
