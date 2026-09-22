@@ -13,8 +13,8 @@ Hyderabad-first beauty marketplace connecting customers with independent nail an
 Requires Node.js 22 or newer.
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Create a local `.env` file when Google Places is enabled:
@@ -26,8 +26,8 @@ GOOGLE_PLACES_API_KEY=
 ## Production
 
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 The production entry point is `hostinger-server.mjs`, which runs the Vinext build on Hostinger's Node.js web-app hosting.
@@ -42,3 +42,11 @@ The production entry point is `hostinger-server.mjs`, which runs the Vinext buil
 - Entry file: `hostinger-server.mjs`
 
 WhatsApp Business and Google Places are intentionally pending until their production credentials are available.
+
+## Separate HTML view folders
+
+- Desktop: `public/desktop/index.html`
+- Mobile: `public/mobile/mobile.html`
+- Maintenance guide: `HTML_VIEWS.md`
+
+These standalone files make desktop-only and mobile-only presentation changes easy to review. The main live homepage remains the responsive React application so visitors automatically receive the correct layout for their screen.

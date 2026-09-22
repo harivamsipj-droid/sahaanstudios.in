@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f4ed" />
+    <title>Sahaan Studios — Mobile View</title>
+    <style>
+      :root { --ivory:#f7f4ed; --paper:#fffdfa; --ink:#1f1c18; --muted:#655d54; --gold:#a77a43; --deep:#775128; --soft:#eee1cf; --line:rgba(76,59,39,.2); }
+      * { box-sizing:border-box; }
+      html,body { max-width:100%; overflow-x:hidden; }
+      html { scroll-behavior:smooth; }
+      body { margin:0; padding-bottom:72px; background:var(--ivory); color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; }
+      a { color:inherit; text-decoration:none; }
+      button,input,select { font:inherit; }
+      .launch { min-height:32px; display:flex; align-items:center; justify-content:center; padding:7px 14px; background:#26211c; color:#eadbc6; text-align:center; font-size:7px; line-height:1.4; letter-spacing:.1em; text-transform:uppercase; }
+      header { height:68px; padding:0 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(247,244,237,.96); position:sticky; top:0; z-index:10; }
+      .brand { min-width:0; display:flex; align-items:center; gap:9px; }
+      .mark { width:36px; height:36px; flex:none; display:grid; place-items:center; border:1px solid var(--gold); border-radius:50%; color:var(--deep); font:italic 21px Georgia,serif; }
+      .brand strong,.brand small { display:block; }
+      .brand strong { font:600 14px Georgia,serif; letter-spacing:.24em; }
+      .brand small { margin-top:3px; color:var(--muted); font-size:7px; letter-spacing:.19em; }
+      .pro-link { color:var(--deep); font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+      .hero-copy { width:100%; padding:44px 18px 30px; overflow:hidden; }
+      .pill { max-width:100%; display:inline-flex; margin-bottom:22px; padding:8px 10px; background:var(--soft); color:var(--deep); font-size:8px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+      h1,h2 { font-family:Georgia,"Times New Roman",serif; font-weight:400; }
+      h1 { margin:0; font-size:clamp(39px,11.6vw,48px); line-height:1; letter-spacing:-.045em; }
+      h1 em,h2 em { color:var(--gold); font-weight:400; }
+      .intro { margin:22px 0 24px; color:var(--muted); font-size:14px; line-height:1.65; }
+      form { width:100%; min-width:0; display:grid; grid-template-columns:minmax(0,1fr); padding:10px; background:var(--paper); border:1px solid var(--line); box-shadow:0 18px 45px rgba(52,39,25,.1); }
+      label { min-width:0; display:grid; gap:6px; padding:12px 10px; border-bottom:1px solid var(--line); }
+      label span { display:flex; justify-content:space-between; gap:8px; font-size:9px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+      label b { flex:none; color:#8b2e1f; font-size:7px; }
+      label small { color:var(--muted); font-size:9px; line-height:1.35; }
+      input,select { width:100%; min-width:0; height:30px; padding:0; border:0; outline:0; background:transparent; color:var(--ink); font-weight:600; }
+      .gold-button { min-height:54px; display:flex; align-items:center; justify-content:center; margin-top:8px; padding:0 16px; border:0; background:var(--deep); color:white; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+      .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:20px; color:var(--muted); font-size:7px; line-height:1.4; text-align:center; text-transform:uppercase; }
+      .visual { min-height:390px; margin-top:4px; background:linear-gradient(180deg,rgba(20,12,5,.02),rgba(20,12,5,.36)),url('/og.png') 67% center/cover no-repeat; position:relative; }
+      .caption { position:absolute; top:24px; left:20px; color:white; text-shadow:0 2px 14px rgba(0,0,0,.3); }
+      .caption span { display:block; margin-bottom:7px; font-size:8px; letter-spacing:.14em; }
+      .caption strong { font:400 23px Georgia,serif; }
+      .status { position:absolute; right:18px; bottom:18px; left:18px; padding:16px 18px; background:rgba(255,253,250,.94); }
+      .status strong,.status small { display:block; }
+      .status small { margin-top:4px; color:var(--muted); font-size:9px; }
+      .services { display:flex; min-height:72px; overflow-x:auto; border-block:1px solid var(--line); scrollbar-width:none; }
+      .services button { flex:none; min-width:max-content; padding:0 20px; border:0; border-right:1px solid var(--line); background:transparent; font:16px Georgia,serif; }
+      .services span { margin-right:8px; color:var(--gold); font:8px "Segoe UI",sans-serif; }
+      .journey { padding:65px 18px; }
+      .eyebrow { color:var(--gold); font-size:9px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+      h2 { margin:10px 0 28px; font-size:37px; line-height:1.05; }
+      .steps { display:grid; gap:1px; background:var(--line); border:1px solid var(--line); }
+      .steps article { padding:26px; background:var(--paper); }
+      .steps b { display:block; margin:18px 0 9px; font:21px Georgia,serif; }
+      .steps p { margin:0; color:var(--muted); font-size:13px; line-height:1.55; }
+      .partner { margin:0 18px 48px; padding:30px 24px; background:#29231d; color:white; }
+      .partner h2 { margin-bottom:16px; font-size:37px; }
+      .partner p { color:#d6c9bb; font-size:13px; line-height:1.6; }
+      .partner .gold-button { width:100%; background:var(--gold); }
+      .bottom-nav { height:68px; display:grid; grid-template-columns:repeat(3,1fr); background:rgba(255,253,250,.97); border-top:1px solid var(--line); position:fixed; right:0; bottom:0; left:0; z-index:20; padding-bottom:env(safe-area-inset-bottom); }
+      .bottom-nav a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--muted); font-size:8px; letter-spacing:.07em; text-transform:uppercase; }
+      .bottom-nav a:first-child { color:var(--deep); }
+      .bottom-nav b { font-size:18px; line-height:1; }
+      @media (max-width:350px) { .brand strong { font-size:12px; } .brand small { font-size:6px; } .pro-link { font-size:8px; } h1 { font-size:38px; } }
+    </style>
+  </head>
+  <body>
+    <!-- MOBILE VIEW: edit this file for the dedicated 320–480px HTML reference. -->
+    <div class="launch">✦ Founding professionals receive 0% commission on their first 10 bookings</div>
+    <header><a class="brand" href="/"><span class="mark">S</span><span><strong>SAHAAN</strong><small>BEAUTY AT HOME</small></span></a><a class="pro-link" href="/partners">For pros</a></header>
+    <main>
+      <section class="hero-copy">
+        <div class="pill">✓ Launching first in Hyderabad</div>
+        <h1>Hyderabad beauty,<br /><em>one PIN code away.</em></h1>
+        <p class="intro">Discover nearby nail salons and beauty professionals. Compare ratings and reviews, with Sahaan verification shown separately.</p>
+        <form id="find">
+          <label><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" required /><small>Any six-digit Hyderabad PIN code</small></label>
+          <label><span>Service <b>Required</b></span><select name="service"><option>Gel manicure</option><option>Nail extensions</option><option>Custom nail art</option><option>Classic manicure</option></select><small>Choose the treatment you need</small></label>
+          <label><span>Preferred date <b>Required</b></span><input name="date" type="date" required /><small>We’ll show relevant availability</small></label>
+          <button class="gold-button" type="submit">⌕ &nbsp; Show my matches</button>
+        </form>
+        <div class="proof"><span>★ 4.9<br />average rating</span><span>100%<br />independently verified</span><span>Support<br />on every booking</span></div>
+      </section>
+      <section class="visual"><div class="caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div class="status"><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></section>
+      <section class="services"><button><span>01</span>Gel manicure</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Classic manicure</button></section>
+      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Enter your Hyderabad PIN</b><p>Share your location, treatment and preferred date.</p></article><article><span>02</span><b>Compare a local shortlist</b><p>Filter nearby businesses by ratings and reviews.</p></article><article><span>03</span><b>Choose with confidence</b><p>Google listings and Sahaan verification stay clearly separate.</p></article></div></section>
+      <section class="partner"><p class="eyebrow">For beauty professionals</p><h2>Your talent deserves <em>the right clients.</em></h2><p>Build a trusted profile, choose where you work and receive quality home-service requests.</p><a class="gold-button" href="/partners">Apply as a professional →</a></section>
+    </main>
+    <nav class="bottom-nav" aria-label="Mobile navigation"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Find</a><a href="/partners"><b>♙</b>For pros</a></nav>
+    <script>
+      const form = document.querySelector('#find');
+      const pin = form.elements.pin;
+      const date = form.elements.date;
+      date.min = new Date().toISOString().split('T')[0];
+      pin.addEventListener('input', () => { pin.value = pin.value.replace(/\D/g, '').slice(0, 6); });
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const values = new FormData(form);
+        location.href = `/professionals?${new URLSearchParams(values).toString()}`;
+      });
+    </script>
+  </body>
+</html>
