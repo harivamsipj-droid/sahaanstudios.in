@@ -5,7 +5,7 @@ The live homepage is the responsive React application in `app/page.tsx`, with sh
 ## Desktop
 
 - File: `public/desktop/index.html`
-- Live path: `/desktop/`
+- Live path: `/desktop/index.html`
 - Designed for screens 1024 pixels and wider.
 
 ## Mobile
