@@ -74,16 +74,25 @@ const server = createServer(async (incoming, outgoing) => {
       duplex: hasBody ? 'half' : undefined,
     });
 
-    const response = await worker.fetch(
-      request,
-      { ...process.env, ASSETS: assets },
-      {
-        passThroughOnException() {},
-        waitUntil(promise) {
-          Promise.resolve(promise).catch(console.error);
-        },
-      },
-    );
+    // Hostinger does not provide Cloudflare's static-asset binding at runtime.
+    // Serve the generated client files directly before handing application
+    // routes to the Vinext worker so CSS, JavaScript, fonts, and images load.
+    const staticResponse = method === 'GET' || method === 'HEAD'
+      ? await assets.fetch(request)
+      : null;
+
+    const response = staticResponse && staticResponse.status !== 404
+      ? staticResponse
+      : await worker.fetch(
+          request,
+          { ...process.env, ASSETS: assets },
+          {
+            passThroughOnException() {},
+            waitUntil(promise) {
+              Promise.resolve(promise).catch(console.error);
+            },
+          },
+        );
 
     outgoing.statusCode = response.status;
     outgoing.statusMessage = response.statusText;
