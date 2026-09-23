@@ -31,8 +31,8 @@
   --input: rgba(76, 59, 39, 0.3);
   --ring: #a77a43;
   --radius: 0.4rem;
-  --font-display: 'Bodoni 72', 'Didot', 'Times New Roman', serif;
-  --font-body: 'Aptos', 'Segoe UI', Arial, sans-serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: 'Segoe UI', Arial, sans-serif;
 }
 * {
   box-sizing: border-box;
@@ -96,7 +96,7 @@ textarea::placeholder {
   margin-left: 8px;
 }
 .market-header {
-  height: 78px;
+  height: 88px;
   padding: 0 clamp(22px, 5vw, 78px);
   display: flex;
   align-items: center;
@@ -112,15 +112,15 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   flex: none;
-  width: 212px;
-  height: 70px;
-  background: #fffdfa url('/brand/three-parts/sahaan-studios-wordmark-4k.webp') right center / 147px auto no-repeat;
+  width: 310px;
+  height: 78px;
+  background: #fffdfa url('/brand/three-parts/sahaan-studios-wordmark-4k.webp') right center / 225px auto no-repeat;
 }
 .market-brand::before {
   content: '';
   display: block;
-  width: 58px;
-  height: 58px;
+  width: 76px;
+  height: 76px;
   flex: none;
   background: url('/brand/three-parts/sahaan-logo-symbol-4k.webp') center / cover no-repeat;
 }
@@ -152,8 +152,8 @@ textarea::placeholder {
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 34px;
-  font-size: 12px;
+  gap: 30px;
+  font-size: 15px;
   font-weight: 600;
 }
 .desktop-nav a:hover {
@@ -165,7 +165,7 @@ textarea::placeholder {
   gap: 22px;
 }
 .signin-link {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -174,12 +174,12 @@ textarea::placeholder {
   color: var(--gold-deep);
 }
 .header-button {
-  height: 42px !important;
+  height: 46px !important;
   border-radius: 0 !important;
   padding: 0 18px !important;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 9px !important;
+  font-size: 11px !important;
   background: var(--gold-deep) !important;
 }
 .menu-button {
@@ -632,9 +632,7 @@ textarea::placeholder {
   align-items: center;
 }
 .partner-cta h2 {
-  font:
-    400 clamp(38px, 4vw, 60px)/1 Georgia,
-    serif;
+  font: 400 clamp(38px, 4vw, 60px)/1 var(--font-display);
   margin: 0;
 }
 .partner-cta h2 em {
@@ -2662,7 +2660,7 @@ textarea::placeholder {
     display: none;
   }
   .market-header {
-    height: 68px;
+    height: 72px;
     padding: 0 16px;
   }
   .signin-link,
@@ -2714,13 +2712,13 @@ textarea::placeholder {
   }
   .market-brand {
     min-width: 0;
-    width: 205px;
-    height: 62px;
-    background-size: 142px auto;
+    width: 255px;
+    height: 66px;
+    background-size: 185px auto;
   }
   .market-brand::before {
-    width: 54px;
-    height: 54px;
+    width: 62px;
+    height: 62px;
   }
   .market-hero {
     display: flex;
@@ -3278,6 +3276,16 @@ textarea::placeholder {
   }
   .legal-page h1 {
     font-size: 49px;
+  }
+}
+@media (max-width: 360px) {
+  .market-brand {
+    width: 238px;
+    background-size: 174px auto;
+  }
+  .market-brand::before {
+    width: 56px;
+    height: 56px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

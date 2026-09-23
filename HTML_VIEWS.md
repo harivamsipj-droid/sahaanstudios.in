@@ -24,3 +24,5 @@ The live homepage is the responsive React application in `app/page.tsx`, with sh
 5. Keep search field names (`pin`, `service`, and `date`) unchanged so both files continue to open the professional results page correctly.
 
 The live homepage and standalone HTML views use `/brand/sahaan-hero-clean-v1.png` for the hero photo. `/og.png` remains the social-sharing image.
+
+Customer pages keep discovery content only; the founding-professional offer and commission panel live on `app/partners/page.tsx`. The header still links to the professional site in one click. Headings use Georgia and interface text uses Segoe UI across the responsive and standalone views.
