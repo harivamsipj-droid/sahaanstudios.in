@@ -1,7 +1,7 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
-import { ArrowRight, CalendarDays, ChevronDown, Clock3, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Star, Users } from 'lucide-react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { ArrowRight, CalendarDays, ChevronDown, Clock3, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Star, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -11,6 +11,27 @@ export default function HomePage() {
   const [service, setService] = useState('Gel manicure');
   const [pinCode, setPinCode] = useState('');
   const [date, setDate] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMenuOpen(false);
+    }
+
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) setMenuOpen(false);
+    }
+
+    document.addEventListener('keydown', closeOnEscape);
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+    };
+  }, [menuOpen]);
 
   function findProfessionals(event: FormEvent) {
     event.preventDefault();
@@ -20,10 +41,17 @@ export default function HomePage() {
 
   return <main>
     <div className="launch-strip"><Sparkles size={13} /> Founding professionals receive 0% commission on their first 10 bookings <a href="/partners">Apply now</a></div>
-    <header className="market-header">
+    <header className="market-header" ref={headerRef}>
       <a className="market-brand" href="/" aria-label="Sahaan home"><span className="market-monogram">S</span><span><strong>SAHAAN</strong><small>BEAUTY AT HOME</small></span></a>
       <nav className="desktop-nav" aria-label="Customer navigation"><a href="#services">Services</a><a href="#how">How it works</a><a href="#trust">Safety & trust</a></nav>
-      <div className="header-actions"><a className="signin-link pro-portal-link" href="/partners">For professionals</a><Button className="header-button" render={<a href="#find" />}>Find a professional <ArrowRight /></Button><button className="menu-button" aria-label="Open menu"><Menu /></button></div>
+      <div className="header-actions"><a className="signin-link pro-portal-link" href="/partners">For professionals</a><Button className="header-button" render={<a href="#find" />}>Find a professional <ArrowRight /></Button><button className="menu-button" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-controls="customer-mobile-menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button></div>
+      <nav className={`customer-mobile-menu${menuOpen ? ' is-open' : ''}`} id="customer-mobile-menu" aria-label="Mobile customer navigation" inert={!menuOpen}>
+        <a href="#find" onClick={() => setMenuOpen(false)}>Find a professional <ArrowRight size={18} /></a>
+        <a href="#services" onClick={() => setMenuOpen(false)}>Services <ArrowRight size={18} /></a>
+        <a href="#how" onClick={() => setMenuOpen(false)}>How it works <ArrowRight size={18} /></a>
+        <a href="#trust" onClick={() => setMenuOpen(false)}>Safety &amp; trust <ArrowRight size={18} /></a>
+        <a href="/partners" onClick={() => setMenuOpen(false)}>For professionals <ArrowRight size={18} /></a>
+      </nav>
     </header>
 
     <section className="market-hero">
