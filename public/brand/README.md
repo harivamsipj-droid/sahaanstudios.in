@@ -1,13 +1,21 @@
-# Approved Sahaan Studios logo
+# Final Sahaan Studios logo
 
-- `sahaan-studios-approved-4k.webp` — approved new artwork, optimized for the website (3840 × 3200). Headers show the wordmark portion without stretching the image; the desktop and responsive footers show the full composition.
-- `sahaan-studios-approved-4k-master.png` — original-resolution PNG master of the same approved design. Keep for future print or design work.
+- `sahaan-studios-final.webp` — final website logo supplied on 23 September 2026, optimized from the attached 3840 × 3200 image. It carries the line “YOUR EXPRESSION. OUR ESSENCE.”
+- `sahaan-studios-final-master.png` — unaltered full-resolution PNG supplied by the user.
+- `sahaan-studios-final-icon.png` — square crop of the emblem for the site icon.
+
+The short headers show the wordmark region of the full image without stretching it. The desktop and responsive footers, and the dedicated mobile HTML page, show the complete artwork. Update these three files together for future logo changes.
+
+## Previous logo files (kept for rollback)
+
+- `sahaan-studios-approved-4k.webp` — earlier website logo.
+- `sahaan-studios-approved-4k-master.png` — earlier PNG master.
 
 - `sahaan-primary-cherry-v1.png` — full vertical logo for large placements.
-- `sahaan-horizontal-cherry-v1.png` — transparent horizontal logo used in the website headers and footers.
-- `sahaan-icon-cherry-v1.png` — square symbol used as the site icon.
+- `sahaan-horizontal-cherry-v1.png` — earlier transparent horizontal logo.
+- `sahaan-icon-cherry-v1.png` — earlier square symbol.
 
-The horizontal and square files adapt the approved vertical design for smaller screen areas. Keep these three files together when updating the logo, then verify `app/globals.css`, `public/desktop/index.html`, and `public/mobile/mobile.html` at phone and desktop widths.
+Verify `app/globals.css`, `public/desktop/index.html`, and `public/mobile/mobile.html` at phone and desktop widths after any logo update.
 
 ## Hero photo
 
