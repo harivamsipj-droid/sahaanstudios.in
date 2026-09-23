@@ -1,11 +1,19 @@
-# Final Sahaan Studios logo
+# Sahaan Studios logo assets
+
+## Current three-part lockup
+
+The `three-parts/` folder contains the user-supplied 4K symbol, SAHAAN STUDIOS wordmark, and “YOUR EXPRESSION. OUR ESSENCE.” tagline in both original PNG and web-optimized WebP formats. The website uses the WebP files; the PNGs are retained as high-resolution source files.
+
+Compact headers pair the symbol and wordmark. The tagline is displayed separately at a readable width in desktop footers, with accessible text at small phone widths. Do not squeeze all three images into a narrow navigation bar.
+
+## Earlier full-image logo (kept for rollback)
 
 - `sahaan-studios-final.webp` — final website logo supplied on 23 September 2026, optimized from the attached 3840 × 3200 image. It carries the line “YOUR EXPRESSION. OUR ESSENCE.”
 - `sahaan-studios-final-master.png` — unaltered full-resolution PNG supplied by the user.
 - `sahaan-studios-final-icon.png` — square crop of the emblem for the site icon.
 - `sahaan-studios-final-wordmark.webp` — proportional crop of the lettering and tagline from the same master for narrow headers.
 
-The short headers place the emblem beside the wordmark so both are visible without distortion. The desktop and responsive footers, and the dedicated mobile HTML page, show the complete artwork. Update these files together for future logo changes.
+These files are no longer used by the current headers or footers. They remain available for rollback. Update the responsive site, desktop HTML reference, and mobile HTML reference together for future logo changes.
 
 ## Previous logo files (kept for rollback)
 

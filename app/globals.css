@@ -114,7 +114,7 @@ textarea::placeholder {
   flex: none;
   width: 212px;
   height: 70px;
-  background: #fffdfa url('/brand/sahaan-studios-final-wordmark.webp') right center / 147px auto no-repeat;
+  background: #fffdfa url('/brand/three-parts/sahaan-studios-wordmark-4k.webp') right center / 147px auto no-repeat;
 }
 .market-brand::before {
   content: '';
@@ -122,7 +122,7 @@ textarea::placeholder {
   width: 58px;
   height: 58px;
   flex: none;
-  background: url('/brand/sahaan-studios-final-icon.png') center / contain no-repeat;
+  background: url('/brand/three-parts/sahaan-logo-symbol-4k.webp') center / cover no-repeat;
 }
 .market-brand > span {
   position: absolute;
@@ -714,16 +714,44 @@ textarea::placeholder {
   text-align: center;
   letter-spacing: 0.08em;
 }
-.market-footer .market-brand {
-  background-color: #fff8ee;
-  background-image: url('/brand/sahaan-studios-final.webp');
-  background-position: center;
-  background-size: contain;
-  width: 212px;
-  height: 177px;
+.market-footer .market-footer-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: min(100%, 250px);
+  padding: 14px 12px;
+  background: #fffdfa;
   border-radius: 3px;
 }
-.market-footer .market-brand::before {
+.market-footer-logo img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.market-footer-logo img:first-child {
+  width: 120px;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.market-footer-logo img:last-child {
+  width: 220px;
+}
+.market-footer-tagline {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  min-height: 38px;
+}
+.market-footer-tagline img {
+  display: block;
+  width: min(620px, 100%);
+  height: auto;
+}
+.market-footer-tagline span {
   display: none;
 }
 .mobile-nav {
@@ -2884,11 +2912,21 @@ textarea::placeholder {
     padding: 45px 22px 90px;
     grid-template-columns: 1fr 1fr;
   }
-  .market-footer > .market-brand {
+  .market-footer > .market-footer-logo {
     grid-column: 1/-1;
-    width: 205px;
-    height: 171px;
     margin-bottom: 15px;
+  }
+  .market-footer-tagline img {
+    display: none;
+  }
+  .market-footer-tagline span {
+    display: block;
+    color: #e8d1b3;
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.16em;
+    text-align: center;
+    text-transform: uppercase;
   }
   .market-footer > div:last-of-type {
     display: none;
