@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f7f4ed" />
+    <link rel="icon" type="image/png" href="/brand/sahaan-icon-cherry-v1.png" />
     <title>Sahaan Studios — Mobile View</title>
     <style>
       :root { --ivory:#f7f4ed; --paper:#fffdfa; --ink:#1f1c18; --muted:#655d54; --gold:#a77a43; --deep:#775128; --soft:#eee1cf; --line:rgba(76,59,39,.2); }
@@ -15,7 +16,8 @@
       button,input,select { font:inherit; }
       .launch { min-height:32px; display:flex; align-items:center; justify-content:center; padding:7px 14px; background:#26211c; color:#eadbc6; text-align:center; font-size:7px; line-height:1.4; letter-spacing:.1em; text-transform:uppercase; }
       header { height:68px; padding:0 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(247,244,237,.96); position:sticky; top:0; z-index:10; }
-      .brand { min-width:0; display:flex; align-items:center; gap:9px; }
+      .brand { min-width:0; width:205px; height:62px; flex:none; display:flex; align-items:center; background:url('/brand/sahaan-horizontal-cherry-v1.png') center/contain no-repeat; }
+      .brand > span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
       .mark { width:42px; height:42px; flex:none; display:block; overflow:hidden; color:transparent; font-size:0; background:url('/sahaan-ss-logo.svg') center/contain no-repeat; }
       .brand strong,.brand small { display:block; }
       .brand strong { font:600 14px Georgia,serif; letter-spacing:.24em; }
@@ -60,7 +62,7 @@
       .bottom-nav a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--muted); font-size:8px; letter-spacing:.07em; text-transform:uppercase; }
       .bottom-nav a:first-child { color:var(--deep); }
       .bottom-nav b { font-size:18px; line-height:1; }
-      @media (max-width:350px) { .brand strong { font-size:12px; } .brand small { font-size:6px; } .pro-link { font-size:8px; } h1 { font-size:38px; } }
+      @media (max-width:350px) { .brand { width:190px; height:58px; } .pro-link { font-size:8px; } h1 { font-size:38px; } }
     </style>
   </head>
   <body>
