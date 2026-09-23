@@ -16,7 +16,7 @@
       .launch { min-height:34px; display:flex; align-items:center; justify-content:center; gap:12px; padding:7px 24px; background:#26211c; color:#eadbc6; font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
       .launch a { color:white; border-bottom:1px solid var(--gold); }
       header { height:78px; padding:0 clamp(30px,5vw,78px); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(247,244,237,.96); position:sticky; top:0; z-index:10; }
-      .brand { display:flex; align-items:center; flex:none; width:212px; height:70px; background:url('/brand/sahaan-horizontal-cherry-v1.png') center/contain no-repeat; }
+      .brand { display:flex; align-items:center; flex:none; width:212px; height:70px; background:#fffdfa url('/brand/sahaan-studios-approved-4k.webp') center bottom/100% auto no-repeat; }
       .brand > span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
       .mark { width:44px; height:44px; flex:none; display:block; overflow:hidden; color:transparent; font-size:0; background:url('/sahaan-ss-logo.svg') center/contain no-repeat; }
       .brand strong,.brand small { display:block; }
@@ -60,7 +60,7 @@
       footer { display:grid; grid-template-columns:1.3fr repeat(3,1fr); gap:50px; padding:60px clamp(36px,7vw,110px); background:#26211c; color:#f3eadf; }
       footer div { display:grid; gap:12px; font-size:12px; }
       footer div strong { color:#c9a574; text-transform:uppercase; letter-spacing:.1em; }
-      footer .brand { background-color:#fff8ee; border-radius:3px; }
+      footer .brand { width:212px; height:177px; background-color:#fff8ee; background-position:center; background-size:contain; border-radius:3px; }
       @media (max-width:1150px) { .hero { grid-template-columns:1fr; } .copy { width:100%; } form { min-width:0; } .visual { width:100%; min-height:520px; } }
       @media (max-width:900px) { header { padding:0 22px; } header nav { display:none; } .hero { display:block; } .copy { padding:60px 28px; } form { grid-template-columns:1fr 1fr; } form button { grid-column:1/-1; min-height:58px; } .services { display:flex; overflow-x:auto; } .services > span { display:none; } .services button { min-width:220px; min-height:90px; } footer { grid-template-columns:1fr 1fr; } }
       @media (max-width:650px) { header .brand { width:185px; height:58px; } header .actions > a:first-child { display:none; } .actions { gap:10px; } .gold-button { padding-inline:14px; } .copy { padding:48px 18px 32px; } h1 { font-size:clamp(41px,12vw,56px); } form { grid-template-columns:1fr; } form button { grid-column:auto; } .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; text-align:center; } .visual { min-height:410px; background-position:67% center; } .journey { padding:65px 18px; } .steps { grid-template-columns:1fr; } footer { grid-template-columns:1fr; } }
@@ -71,7 +71,7 @@
     <!-- DESKTOP VIEW: edit this file for the large-screen HTML reference. -->
     <div class="launch">✦ Founding professionals receive 0% commission on their first 10 bookings <a href="/partners">Apply now</a></div>
     <header>
-      <a class="brand" href="/"><span class="mark">S</span><span><strong>SAHAAN</strong><small>BEAUTY AT HOME</small></span></a>
+      <a class="brand" href="/" aria-label="Sahaan Studios home"></a>
       <nav><a href="#services">Services</a><a href="#how">How it works</a><a href="#trust">Safety &amp; trust</a></nav>
       <div class="actions"><a href="/partners">For professionals</a><a class="gold-button" href="#find">Find a professional →</a></div>
     </header>
@@ -94,7 +94,7 @@
       <section class="services" id="services"><span>Popular now</span><button><span>01</span>Gel manicure</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Classic manicure</button></section>
       <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See only relevant professionals.</h2><div class="steps"><article><span>01</span><b>Enter your Hyderabad PIN</b><p>Share your location, treatment and preferred date.</p></article><article><span>02</span><b>Compare a local shortlist</b><p>Filter nearby businesses by rating and review count.</p></article><article id="trust"><span>03</span><b>Choose with confidence</b><p>Google listings and Sahaan verification stay clearly separate.</p></article></div></section>
     </main>
-    <footer><a class="brand" href="/"><span class="mark">S</span><span><strong>SAHAAN</strong><small>BEAUTY AT HOME</small></span></a><div><strong>Customers</strong><a href="/professionals">Search Hyderabad</a><a href="#services">Services</a></div><div><strong>Professionals</strong><a href="/partners">Apply to join</a><a href="/partners#earnings">Earnings</a></div><div><strong>Trust</strong><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div></footer>
+    <footer><a class="brand" href="/" aria-label="Sahaan Studios home"></a><div><strong>Customers</strong><a href="/professionals">Search Hyderabad</a><a href="#services">Services</a></div><div><strong>Professionals</strong><a href="/partners">Apply to join</a><a href="/partners#earnings">Earnings</a></div><div><strong>Trust</strong><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div></footer>
     <script>
       const form = document.querySelector('#find');
       const date = form.elements.date;

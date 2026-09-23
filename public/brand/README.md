@@ -1,5 +1,8 @@
 # Approved Sahaan Studios logo
 
+- `sahaan-studios-approved-4k.webp` — approved new artwork, optimized for the website (3840 × 3200). Headers show the wordmark portion without stretching the image; the desktop and responsive footers show the full composition.
+- `sahaan-studios-approved-4k-master.png` — original-resolution PNG master of the same approved design. Keep for future print or design work.
+
 - `sahaan-primary-cherry-v1.png` — full vertical logo for large placements.
 - `sahaan-horizontal-cherry-v1.png` — transparent horizontal logo used in the website headers and footers.
 - `sahaan-icon-cherry-v1.png` — square symbol used as the site icon.

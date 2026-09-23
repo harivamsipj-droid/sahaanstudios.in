@@ -114,7 +114,7 @@ textarea::placeholder {
   flex: none;
   width: 212px;
   height: 70px;
-  background: url('/brand/sahaan-horizontal-cherry-v1.png') center / contain no-repeat;
+  background: #fffdfa url('/brand/sahaan-studios-approved-4k.webp') center bottom / 100% auto no-repeat;
 }
 .market-brand > span {
   position: absolute;
@@ -708,6 +708,10 @@ textarea::placeholder {
 }
 .market-footer .market-brand {
   background-color: #fff8ee;
+  background-position: center;
+  background-size: contain;
+  width: 212px;
+  height: 177px;
   border-radius: 3px;
 }
 .mobile-nav {
@@ -2865,6 +2869,8 @@ textarea::placeholder {
   }
   .market-footer > .market-brand {
     grid-column: 1/-1;
+    width: 205px;
+    height: 171px;
     margin-bottom: 15px;
   }
   .market-footer > div:last-of-type {
