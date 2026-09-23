@@ -114,7 +114,15 @@ textarea::placeholder {
   flex: none;
   width: 212px;
   height: 70px;
-  background: #fffdfa url('/brand/sahaan-studios-final.webp') center bottom / 100% auto no-repeat;
+  background: #fffdfa url('/brand/sahaan-studios-final-wordmark.webp') right center / 147px auto no-repeat;
+}
+.market-brand::before {
+  content: '';
+  display: block;
+  width: 58px;
+  height: 58px;
+  flex: none;
+  background: url('/brand/sahaan-studios-final-icon.png') center / contain no-repeat;
 }
 .market-brand > span {
   position: absolute;
@@ -708,11 +716,15 @@ textarea::placeholder {
 }
 .market-footer .market-brand {
   background-color: #fff8ee;
+  background-image: url('/brand/sahaan-studios-final.webp');
   background-position: center;
   background-size: contain;
   width: 212px;
   height: 177px;
   border-radius: 3px;
+}
+.market-footer .market-brand::before {
+  display: none;
 }
 .mobile-nav {
   display: none;
@@ -2676,6 +2688,11 @@ textarea::placeholder {
     min-width: 0;
     width: 205px;
     height: 62px;
+    background-size: 142px auto;
+  }
+  .market-brand::before {
+    width: 54px;
+    height: 54px;
   }
   .market-hero {
     display: flex;

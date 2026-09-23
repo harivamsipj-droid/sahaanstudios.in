@@ -3,8 +3,9 @@
 - `sahaan-studios-final.webp` — final website logo supplied on 23 September 2026, optimized from the attached 3840 × 3200 image. It carries the line “YOUR EXPRESSION. OUR ESSENCE.”
 - `sahaan-studios-final-master.png` — unaltered full-resolution PNG supplied by the user.
 - `sahaan-studios-final-icon.png` — square crop of the emblem for the site icon.
+- `sahaan-studios-final-wordmark.webp` — proportional crop of the lettering and tagline from the same master for narrow headers.
 
-The short headers show the wordmark region of the full image without stretching it. The desktop and responsive footers, and the dedicated mobile HTML page, show the complete artwork. Update these three files together for future logo changes.
+The short headers place the emblem beside the wordmark so both are visible without distortion. The desktop and responsive footers, and the dedicated mobile HTML page, show the complete artwork. Update these files together for future logo changes.
 
 ## Previous logo files (kept for rollback)
 

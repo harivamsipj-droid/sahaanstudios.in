@@ -16,7 +16,8 @@
       .launch { min-height:34px; display:flex; align-items:center; justify-content:center; gap:12px; padding:7px 24px; background:#26211c; color:#eadbc6; font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
       .launch a { color:white; border-bottom:1px solid var(--gold); }
       header { height:78px; padding:0 clamp(30px,5vw,78px); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(247,244,237,.96); position:sticky; top:0; z-index:10; }
-      .brand { display:flex; align-items:center; flex:none; width:212px; height:70px; background:#fffdfa url('/brand/sahaan-studios-final.webp') center bottom/100% auto no-repeat; }
+      .brand { display:flex; align-items:center; flex:none; width:212px; height:70px; background:#fffdfa url('/brand/sahaan-studios-final-wordmark.webp') right center/147px auto no-repeat; }
+      .brand::before { content:''; display:block; flex:none; width:58px; height:58px; background:url('/brand/sahaan-studios-final-icon.png') center/contain no-repeat; }
       .brand > span { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
       .mark { width:44px; height:44px; flex:none; display:block; overflow:hidden; color:transparent; font-size:0; background:url('/sahaan-ss-logo.svg') center/contain no-repeat; }
       .brand strong,.brand small { display:block; }
@@ -60,10 +61,12 @@
       footer { display:grid; grid-template-columns:1.3fr repeat(3,1fr); gap:50px; padding:60px clamp(36px,7vw,110px); background:#26211c; color:#f3eadf; }
       footer div { display:grid; gap:12px; font-size:12px; }
       footer div strong { color:#c9a574; text-transform:uppercase; letter-spacing:.1em; }
-      footer .brand { width:212px; height:177px; background-color:#fff8ee; background-position:center; background-size:contain; border-radius:3px; }
+      footer .brand { width:212px; height:177px; background-color:#fff8ee; background-image:url('/brand/sahaan-studios-final.webp'); background-position:center; background-size:contain; border-radius:3px; }
+      footer .brand::before { display:none; }
       @media (max-width:1150px) { .hero { grid-template-columns:1fr; } .copy { width:100%; } form { min-width:0; } .visual { width:100%; min-height:520px; } }
       @media (max-width:900px) { header { padding:0 22px; } header nav { display:none; } .hero { display:block; } .copy { padding:60px 28px; } form { grid-template-columns:1fr 1fr; } form button { grid-column:1/-1; min-height:58px; } .services { display:flex; overflow-x:auto; } .services > span { display:none; } .services button { min-width:220px; min-height:90px; } footer { grid-template-columns:1fr 1fr; } }
       @media (max-width:650px) { header .brand { width:185px; height:58px; } header .actions > a:first-child { display:none; } .actions { gap:10px; } .gold-button { padding-inline:14px; } .copy { padding:48px 18px 32px; } h1 { font-size:clamp(41px,12vw,56px); } form { grid-template-columns:1fr; } form button { grid-column:auto; } .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; text-align:center; } .visual { min-height:410px; background-position:67% center; } .journey { padding:65px 18px; } .steps { grid-template-columns:1fr; } footer { grid-template-columns:1fr; } }
+      @media (max-width:650px) { header .brand { background-size:128px auto; } header .brand::before { width:50px; height:50px; } }
       @media (max-width:650px) { .visual { display:flex; flex-direction:column; min-height:0; background:none; } .visual::before { content:''; order:0; display:block; flex:none; height:400px; background:#d8c2a4 url('/brand/sahaan-hero-clean-v1.png') 60% center/cover no-repeat; } .caption { position:relative; top:auto; left:auto; order:-1; max-width:none; padding:20px 18px; box-shadow:none; } .status { position:relative; order:1; right:auto; bottom:auto; margin:-44px 18px 18px; } }
     </style>
   </head>
