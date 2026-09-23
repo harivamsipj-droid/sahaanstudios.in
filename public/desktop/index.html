@@ -38,8 +38,8 @@
       input,select { width:100%; min-width:0; height:28px; padding:0; border:0; outline:0; background:transparent; color:var(--ink); font-weight:600; }
       form button { min-height:70px; }
       .proof { display:flex; gap:25px; margin-top:24px; color:var(--muted); font-size:9px; letter-spacing:.08em; text-transform:uppercase; }
-      .visual { min-height:650px; background:linear-gradient(180deg,rgba(20,12,5,.02),rgba(20,12,5,.32)),url('/og.png') center/cover no-repeat; position:relative; }
-      .caption { position:absolute; top:45px; left:42px; color:white; text-shadow:0 2px 14px rgba(0,0,0,.3); }
+      .visual { min-height:650px; background:#d8c2a4 url('/brand/sahaan-hero-clean-v1.png') center/cover no-repeat; position:relative; }
+      .caption { position:absolute; top:45px; left:42px; max-width:245px; padding:16px 20px; color:var(--deep); background:rgba(255,253,250,.94); box-shadow:0 12px 35px rgba(31,24,17,.1); }
       .caption span { display:block; margin-bottom:8px; font-size:9px; letter-spacing:.15em; }
       .caption strong { font:400 28px Georgia,serif; }
       .status { position:absolute; right:28px; bottom:28px; padding:18px 22px; background:rgba(255,253,250,.94); }
@@ -64,6 +64,7 @@
       @media (max-width:1150px) { .hero { grid-template-columns:1fr; } .copy { width:100%; } form { min-width:0; } .visual { width:100%; min-height:520px; } }
       @media (max-width:900px) { header { padding:0 22px; } header nav { display:none; } .hero { display:block; } .copy { padding:60px 28px; } form { grid-template-columns:1fr 1fr; } form button { grid-column:1/-1; min-height:58px; } .services { display:flex; overflow-x:auto; } .services > span { display:none; } .services button { min-width:220px; min-height:90px; } footer { grid-template-columns:1fr 1fr; } }
       @media (max-width:650px) { header .brand { width:185px; height:58px; } header .actions > a:first-child { display:none; } .actions { gap:10px; } .gold-button { padding-inline:14px; } .copy { padding:48px 18px 32px; } h1 { font-size:clamp(41px,12vw,56px); } form { grid-template-columns:1fr; } form button { grid-column:auto; } .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; text-align:center; } .visual { min-height:410px; background-position:67% center; } .journey { padding:65px 18px; } .steps { grid-template-columns:1fr; } footer { grid-template-columns:1fr; } }
+      @media (max-width:650px) { .visual { display:flex; flex-direction:column; min-height:0; background:none; } .visual::before { content:''; order:0; display:block; flex:none; height:400px; background:#d8c2a4 url('/brand/sahaan-hero-clean-v1.png') 60% center/cover no-repeat; } .caption { position:relative; top:auto; left:auto; order:-1; max-width:none; padding:20px 18px; box-shadow:none; } .status { position:relative; order:1; right:auto; bottom:auto; margin:-44px 18px 18px; } }
     </style>
   </head>
   <body>

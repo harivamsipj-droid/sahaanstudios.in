@@ -23,4 +23,4 @@ The live homepage is the responsive React application in `app/page.tsx`, with sh
 4. Never edit the generated `dist` folder. It is recreated during deployment.
 5. Keep search field names (`pin`, `service`, and `date`) unchanged so both files continue to open the professional results page correctly.
 
-The standalone HTML views use `/og.png`, so the same approved Sahaan hero artwork stays consistent across desktop and mobile.
+The live homepage and standalone HTML views use `/brand/sahaan-hero-clean-v1.png` for the hero photo. `/og.png` remains the social-sharing image.

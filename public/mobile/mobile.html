@@ -37,11 +37,12 @@
       input,select { width:100%; min-width:0; height:30px; padding:0; border:0; outline:0; background:transparent; color:var(--ink); font-weight:600; }
       .gold-button { min-height:54px; display:flex; align-items:center; justify-content:center; margin-top:8px; padding:0 16px; border:0; background:var(--deep); color:white; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
       .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:20px; color:var(--muted); font-size:7px; line-height:1.4; text-align:center; text-transform:uppercase; }
-      .visual { min-height:390px; margin-top:4px; background:linear-gradient(180deg,rgba(20,12,5,.02),rgba(20,12,5,.36)),url('/og.png') 67% center/cover no-repeat; position:relative; }
-      .caption { position:absolute; top:24px; left:20px; color:white; text-shadow:0 2px 14px rgba(0,0,0,.3); }
+      .visual { display:flex; flex-direction:column; margin-top:4px; background:var(--paper); position:relative; }
+      .visual::before { content:''; order:0; display:block; flex:none; height:400px; background:#d8c2a4 url('/brand/sahaan-hero-clean-v1.png') 60% center/cover no-repeat; }
+      .caption { order:-1; padding:20px 18px; color:var(--deep); background:var(--paper); }
       .caption span { display:block; margin-bottom:7px; font-size:8px; letter-spacing:.14em; }
-      .caption strong { font:400 23px Georgia,serif; }
-      .status { position:absolute; right:18px; bottom:18px; left:18px; padding:16px 18px; background:rgba(255,253,250,.94); }
+      .caption strong { font:400 25px Georgia,serif; }
+      .status { position:relative; order:1; margin:-44px 18px 18px; padding:16px 18px; background:rgba(255,253,250,.97); }
       .status strong,.status small { display:block; }
       .status small { margin-top:4px; color:var(--muted); font-size:9px; }
       .services { display:flex; min-height:72px; overflow-x:auto; border-block:1px solid var(--line); scrollbar-width:none; }
