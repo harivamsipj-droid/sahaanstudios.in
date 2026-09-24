@@ -41,7 +41,9 @@ The production entry point is `hostinger-server.mjs`, which runs the Vinext buil
 - Output directory: `dist`
 - Entry file: `hostinger-server.mjs`
 
-WhatsApp Business and Google Places are intentionally pending until their production credentials are available.
+Google Places search is configured on the host. Customer enquiries and professional applications open a click-to-chat conversation with Sahaan's temporary launch number; they are not automated bookings or a WhatsApp Business API integration. The visitor must send the prepared message in WhatsApp.
+
+To replace the temporary number later, update `SAHAAN_WHATSAPP_NUMBER` and `SAHAAN_WHATSAPP_DISPLAY` in `lib/contact.ts`, plus the links in both standalone HTML views (`public/desktop/index.html` and `public/mobile/mobile.html`). WhatsApp click-to-chat URLs use the full international number without a plus sign.
 
 ## Separate HTML view folders
 

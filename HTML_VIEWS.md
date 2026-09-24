@@ -22,6 +22,7 @@ The live homepage is the responsive React application in `app/page.tsx`, with sh
 3. Change the main responsive production experience in `app/page.tsx` and `app/globals.css`.
 4. Never edit the generated `dist` folder. It is recreated during deployment.
 5. Keep search field names (`pin`, `service`, and `date`) unchanged so both files continue to open the professional results page correctly.
+6. When the temporary WhatsApp number changes, update the links in both HTML files and the live React number in `lib/contact.ts`.
 
 The live homepage and standalone HTML views use `/brand/sahaan-hero-clean-v1.png` for the hero photo. `/og.png` remains the social-sharing image.
 

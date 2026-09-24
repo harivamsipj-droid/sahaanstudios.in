@@ -714,6 +714,29 @@ textarea::placeholder {
   font-size: 10px;
   color: #bdb2a4;
 }
+.market-footer > div .footer-whatsapp {
+  color: #ead2af;
+  font-size: 12px;
+  font-weight: 600;
+}
+.whatsapp-inline-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--gold-deep);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.whatsapp-inline-link svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
 .market-footer > small {
   grid-column: 1/-1;
   border-top: 1px solid rgba(255, 255, 255, 0.12);

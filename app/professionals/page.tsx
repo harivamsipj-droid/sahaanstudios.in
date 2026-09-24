@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, BadgeCheck, Building2, Check, ExternalLink, Home
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { GooglePlaceResult, GooglePlaceSearchResponse } from '@/lib/google-place-types';
+import { SAHAAN_WHATSAPP_DISPLAY, sahaanWhatsAppUrl } from '@/lib/contact';
 
 const serviceOptions = ['Gel manicure', 'Nail extensions', 'Custom nail art', 'Classic manicure', 'Beauty salon'];
 
@@ -74,8 +75,8 @@ export default function ProfessionalsPage() {
   }
 
   function requestSalon(place: GooglePlaceResult) {
-    const message = `Hi Sahaan! I found ${place.name} near Hyderabad PIN ${pinCode}. I would like to know when this salon becomes bookable on Sahaan.\n\nGoogle Maps profile: ${place.mapsUrl}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    const message = `Hi Sahaan! I found ${place.name} near Hyderabad PIN ${pinCode}. I am interested in ${service}${requestedDate ? ` on ${requestedDate}` : ''}. Please let me know if this salon becomes bookable through Sahaan.\n\nGoogle Maps profile: ${place.mapsUrl}`;
+    window.open(sahaanWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
   }
 
   return <main className="directory-page hyderabad-directory">
@@ -83,6 +84,7 @@ export default function ProfessionalsPage() {
 
     <section className="directory-hero directory-working-hero"><a href="/" className="back-link"><ArrowLeft /> Back to customer website</a><p className="eyebrow">Launching across Hyderabad</p><h1>Search one PIN code.<br /><em>Compare nearby professionals.</em></h1><p>Discover nail salons and beauty professionals near any Hyderabad PIN code, then filter by Google Maps rating and review volume.</p>
       <form className="directory-search pin-search" onSubmit={submitSearch}><label><span>Hyderabad PIN code</span><div><MapPin /><Input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={pinCode} onChange={(event) => setPinCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g. 500034" /></div></label><label><span>Service required</span><div><Sparkles /><select value={service} onChange={(event) => setService(event.target.value)}>{serviceOptions.map((item) => <option key={item}>{item}</option>)}</select></div></label><Button type="submit" disabled={loading}><Search /> {loading ? 'Searching…' : 'Search nearby'}</Button></form>
+      <a className="whatsapp-inline-link" href={sahaanWhatsAppUrl('Hi Sahaan! I have a question about finding a beauty professional in Hyderabad.')} target="_blank" rel="noopener noreferrer"><MessageCircle /> Need help? WhatsApp {SAHAAN_WHATSAPP_DISPLAY}</a>
       {requestedDate && <div className="requested-date"><Check /> Preferred appointment date: <b>{new Date(`${requestedDate}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</b></div>}
     </section>
 

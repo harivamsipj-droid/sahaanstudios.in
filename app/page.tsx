@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CalendarDays, ChevronDown, Clock3, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Star, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SAHAAN_WHATSAPP_DISPLAY, sahaanWhatsAppUrl } from '@/lib/contact';
 
 const services = ['Gel manicure', 'Nail extensions', 'Custom nail art', 'Classic manicure'];
 
@@ -42,13 +43,14 @@ export default function HomePage() {
   return <main>
     <header className="market-header" ref={headerRef}>
       <a className="market-brand" href="/" aria-label="Sahaan Studios home" />
-      <nav className="desktop-nav" aria-label="Customer navigation"><a href="#services">Services</a><a href="#how">How it works</a><a href="#trust">Safety & trust</a></nav>
+      <nav className="desktop-nav" aria-label="Customer navigation"><a href="#services">Services</a><a href="#how">How it works</a><a href="#trust">Safety & trust</a><a href={sahaanWhatsAppUrl()} target="_blank" rel="noopener noreferrer">WhatsApp</a></nav>
       <div className="header-actions"><a className="signin-link pro-portal-link" href="/partners">For professionals</a><Button className="header-button" render={<a href="#find" />}>Find a professional <ArrowRight /></Button><button className="menu-button" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-controls="customer-mobile-menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X /> : <Menu />}</button></div>
       <nav className={`customer-mobile-menu${menuOpen ? ' is-open' : ''}`} id="customer-mobile-menu" aria-label="Mobile customer navigation" inert={!menuOpen}>
         <a href="#find" onClick={() => setMenuOpen(false)}>Find a professional <ArrowRight size={18} /></a>
         <a href="#services" onClick={() => setMenuOpen(false)}>Services <ArrowRight size={18} /></a>
         <a href="#how" onClick={() => setMenuOpen(false)}>How it works <ArrowRight size={18} /></a>
         <a href="#trust" onClick={() => setMenuOpen(false)}>Safety &amp; trust <ArrowRight size={18} /></a>
+        <a href={sahaanWhatsAppUrl()} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>WhatsApp Sahaan · {SAHAAN_WHATSAPP_DISPLAY} <ArrowRight size={18} /></a>
         <a href="/partners" onClick={() => setMenuOpen(false)}>For professionals <ArrowRight size={18} /></a>
       </nav>
     </header>
@@ -78,7 +80,7 @@ export default function HomePage() {
     </section>
 
     <section className="trust-band" id="trust"><div><ShieldCheck /><strong>Skill verified</strong><p>Portfolios and practical ability reviewed before activation.</p></div><div><Users /><strong>Real professionals</strong><p>Identity and contact details checked by the Sahaan team.</p></div><div><Home /><strong>Made for home</strong><p>Clear service areas, punctuality standards and hygiene protocols.</p></div></section>
-    <footer className="market-footer"><a className="market-footer-logo" href="/" aria-label="Sahaan Studios home"><span aria-hidden="true" /><span aria-hidden="true" /></a><div><strong>Customers</strong><a href="/professionals">Search Hyderabad</a><a href="#services">Services & pricing</a><a href="#how">How Sahaan works</a></div><div><strong>Professionals</strong><a href="/partners">Apply to join</a><a href="/partners#earnings">Earnings calculator</a><a href="/partners#application">Application form</a></div><div><strong>Trust & legal</strong><a href="#trust">Verification standards</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms of use</a></div><p className="market-footer-tagline"><img src="/brand/web/sahaan-tagline-web.png" alt="Your expression. Our essence." loading="lazy" /><span>Your expression. Our essence.</span></p><small>© 2026 Sahaan · Hyderabad launch marketplace for independent beauty professionals. Google-listed businesses are not automatically Sahaan-verified.</small></footer>
+    <footer className="market-footer"><a className="market-footer-logo" href="/" aria-label="Sahaan Studios home"><span aria-hidden="true" /><span aria-hidden="true" /></a><div><strong>Customers</strong><a href="/professionals">Search Hyderabad</a><a href="#services">Services & pricing</a><a href="#how">How Sahaan works</a><a className="footer-whatsapp" href={sahaanWhatsAppUrl()} target="_blank" rel="noopener noreferrer">WhatsApp {SAHAAN_WHATSAPP_DISPLAY}</a></div><div><strong>Professionals</strong><a href="/partners">Apply to join</a><a href="/partners#earnings">Earnings calculator</a><a href="/partners#application">Application form</a></div><div><strong>Trust & legal</strong><a href="#trust">Verification standards</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms of use</a></div><p className="market-footer-tagline"><img src="/brand/web/sahaan-tagline-web.png" alt="Your expression. Our essence." loading="lazy" /><span>Your expression. Our essence.</span></p><small>© 2026 Sahaan · Hyderabad launch marketplace for independent beauty professionals. Google-listed businesses are not automatically Sahaan-verified.</small></footer>
     <div className="mobile-nav"><a href="/"><Home /><span>Home</span></a><a href="#find"><Search /><span>Find</span></a><a href="/partners"><Users /><span>For pros</span></a></div>
   </main>;
 }
