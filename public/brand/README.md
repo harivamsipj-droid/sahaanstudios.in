@@ -1,34 +1,14 @@
 # Sahaan Studios logo assets
 
-## Current transparent website logo
+## Current website logo
 
-`sahaan-horizontal-cherry-v1.png` is the current compact website logo. Its genuine alpha transparency lets the header use the original burgundy-and-gold art without a pale rectangle. The footer uses the same transparent file in a single light color for contrast on the dark background. The tagline is HTML text, so it remains clear at any screen width.
+The approved logo is assembled from the user-supplied 4K symbol and SAHAAN STUDIOS wordmark in `three-parts/`. The tagline from the same set is displayed in the desktop footer; on narrow screens, its wording remains accessible as text. The pale source backgrounds are blended into the site surfaces, so the art is not shown inside separate white cards.
 
-The background-removal image edit attempted on 24 September 2026 returned a painted checkerboard rather than real transparency, so that generated output was not used.
+The folder contains the original PNGs and web-optimized WebP versions. Keep the source artwork intact. Update `app/globals.css`, `public/desktop/index.html`, and `public/mobile/mobile.html` together for future logo changes.
 
-## Supplied three-part 4K artwork (preserved)
+## Site icon
 
-The `three-parts/` folder contains the user-supplied 4K symbol, SAHAAN STUDIOS wordmark, and “YOUR EXPRESSION. OUR ESSENCE.” tagline in both original PNG and web-optimized WebP formats. These originals remain untouched for future print or brand work.
-
-Do not squeeze all three images into a narrow navigation bar or display their pale image backgrounds as white cards.
-
-## Earlier full-image logo (kept for rollback)
-
-- `sahaan-studios-final.webp` — final website logo supplied on 23 September 2026, optimized from the attached 3840 × 3200 image. It carries the line “YOUR EXPRESSION. OUR ESSENCE.”
-- `sahaan-studios-final-master.png` — unaltered full-resolution PNG supplied by the user.
-- `sahaan-studios-final-icon.png` — square crop of the emblem for the site icon.
-- `sahaan-studios-final-wordmark.webp` — proportional crop of the lettering and tagline from the same master for narrow headers.
-
-These files are no longer used by the current headers or footers. They remain available for rollback. Update the responsive site, desktop HTML reference, and mobile HTML reference together for future logo changes.
-
-## Previous logo files (kept for rollback)
-
-- `sahaan-studios-approved-4k.webp` — earlier website logo.
-- `sahaan-studios-approved-4k-master.png` — earlier PNG master.
-
-- `sahaan-primary-cherry-v1.png` — full vertical logo for large placements.
-- `sahaan-horizontal-cherry-v1.png` — current transparent horizontal website logo.
-- `sahaan-icon-cherry-v1.png` — earlier square symbol.
+`sahaan-studios-final-icon.png` is the square crop of the approved emblem used as the favicon. All other earlier logo variants were removed; they can be recovered from Git history if ever needed.
 
 Verify `app/globals.css`, `public/desktop/index.html`, and `public/mobile/mobile.html` at phone and desktop widths after any logo update.
 
