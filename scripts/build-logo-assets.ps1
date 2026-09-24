@@ -7,7 +7,7 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 $logos = @(
   @{ Source = 'sahaan-logo-symbol-4k.png'; Output = 'sahaan-symbol-web.png'; Width = 264 },
-  @{ Source = 'sahaan-studios-wordmark-4k.png'; Output = 'sahaan-wordmark-web.png'; Width = 760 },
+  @{ Source = 'sahaan-studios-wordmark-4k.png'; Output = 'sahaan-wordmark-web-v2.png'; Width = 760 },
   @{ Source = 'sahaan-tagline-4k.png'; Output = 'sahaan-tagline-web.png'; Width = 1240 }
 )
 
@@ -28,6 +28,21 @@ foreach ($logo in $logos) {
         $graphics.DrawImage($source, 0, 0, $targetWidth, $targetHeight)
       } finally {
         $graphics.Dispose()
+      }
+      if ($logo.Output -eq 'sahaan-wordmark-web-v2.png') {
+        # The supplied crop has a narrow black extraction mark at the top,
+        # outside the lettering. Repair only this web-sized copy.
+        for ($y = 0; $y -le 6; $y++) {
+          $left = $target.GetPixel(460, $y)
+          $right = $target.GetPixel(535, $y)
+          for ($x = 469; $x -le 534; $x++) {
+            $weight = ($x - 460) / 75
+            $red = [int][Math]::Round($left.R * (1 - $weight) + $right.R * $weight)
+            $green = [int][Math]::Round($left.G * (1 - $weight) + $right.G * $weight)
+            $blue = [int][Math]::Round($left.B * (1 - $weight) + $right.B * $weight)
+            $target.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($red, $green, $blue))
+          }
+        }
       }
       $target.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
     } finally {

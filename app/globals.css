@@ -131,8 +131,8 @@ textarea::placeholder {
   display: block;
   flex: none;
   width: 190px;
-  height: 46px;
-  background: url('/brand/web/sahaan-wordmark-web.png') center / 190px auto no-repeat;
+  height: 51px;
+  background: url('/brand/web/sahaan-wordmark-web-v2.png') center / contain no-repeat;
   filter: brightness(1.08) contrast(1.06);
   mix-blend-mode: multiply;
 }
@@ -744,8 +744,8 @@ textarea::placeholder {
 }
 .market-footer-logo span:last-child {
   width: 206px;
-  height: 49px;
-  background: url('/brand/web/sahaan-wordmark-web.png') center / 206px auto no-repeat;
+  height: 56px;
+  background: url('/brand/web/sahaan-wordmark-web-v2.png') center / contain no-repeat;
 }
 .market-footer-tagline {
   grid-column: 1 / -1;
@@ -2732,8 +2732,7 @@ textarea::placeholder {
   }
   .market-brand::after {
     width: 156px;
-    height: 38px;
-    background-size: 156px auto;
+    height: 42px;
   }
   .market-hero {
     display: flex;
@@ -3306,8 +3305,7 @@ textarea::placeholder {
   }
   .market-brand::after {
     width: 140px;
-    height: 34px;
-    background-size: 140px auto;
+    height: 38px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
