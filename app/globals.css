@@ -112,17 +112,12 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   flex: none;
-  width: 310px;
-  height: 78px;
-  background: #fffdfa url('/brand/three-parts/sahaan-studios-wordmark-4k.webp') right center / 225px auto no-repeat;
+  width: 265px;
+  height: 72px;
+  background: url('/brand/sahaan-horizontal-cherry-v1.png') left center / contain no-repeat;
 }
 .market-brand::before {
-  content: '';
-  display: block;
-  width: 76px;
-  height: 76px;
-  flex: none;
-  background: url('/brand/three-parts/sahaan-logo-symbol-4k.webp') center / cover no-repeat;
+  content: none;
 }
 .market-brand > span {
   position: absolute;
@@ -713,44 +708,25 @@ textarea::placeholder {
   letter-spacing: 0.08em;
 }
 .market-footer .market-footer-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: min(100%, 250px);
-  padding: 14px 12px;
-  background: #fffdfa;
-  border-radius: 3px;
+  display: block;
+  align-self: start;
+  width: min(100%, 245px);
 }
 .market-footer-logo img {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: auto;
-}
-.market-footer-logo img:first-child {
-  width: 120px;
-  aspect-ratio: 1;
-  object-fit: cover;
-}
-.market-footer-logo img:last-child {
-  width: 220px;
+  filter: brightness(0) invert(0.91);
 }
 .market-footer-tagline {
   grid-column: 1 / -1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: #e8d1b3;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.17em;
   margin: 0;
-  min-height: 38px;
-}
-.market-footer-tagline img {
-  display: block;
-  width: min(620px, 100%);
-  height: auto;
-}
-.market-footer-tagline span {
-  display: none;
+  text-align: center;
+  text-transform: uppercase;
 }
 .mobile-nav {
   display: none;
@@ -2712,12 +2688,7 @@ textarea::placeholder {
   }
   .market-brand {
     min-width: 0;
-    width: 255px;
-    height: 66px;
-    background-size: 185px auto;
-  }
-  .market-brand::before {
-    width: 62px;
+    width: 220px;
     height: 62px;
   }
   .market-hero {
@@ -2914,17 +2885,8 @@ textarea::placeholder {
     grid-column: 1/-1;
     margin-bottom: 15px;
   }
-  .market-footer-tagline img {
-    display: none;
-  }
-  .market-footer-tagline span {
-    display: block;
-    color: #e8d1b3;
+  .market-footer-tagline {
     font-size: 11px;
-    line-height: 1.5;
-    letter-spacing: 0.16em;
-    text-align: center;
-    text-transform: uppercase;
   }
   .market-footer > div:last-of-type {
     display: none;
@@ -3280,12 +3242,7 @@ textarea::placeholder {
 }
 @media (max-width: 360px) {
   .market-brand {
-    width: 238px;
-    background-size: 174px auto;
-  }
-  .market-brand::before {
-    width: 56px;
-    height: 56px;
+    width: 198px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

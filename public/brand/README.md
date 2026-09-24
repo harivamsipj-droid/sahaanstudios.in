@@ -1,10 +1,16 @@
 # Sahaan Studios logo assets
 
-## Current three-part lockup
+## Current transparent website logo
 
-The `three-parts/` folder contains the user-supplied 4K symbol, SAHAAN STUDIOS wordmark, and “YOUR EXPRESSION. OUR ESSENCE.” tagline in both original PNG and web-optimized WebP formats. The website uses the WebP files; the PNGs are retained as high-resolution source files.
+`sahaan-horizontal-cherry-v1.png` is the current compact website logo. Its genuine alpha transparency lets the header use the original burgundy-and-gold art without a pale rectangle. The footer uses the same transparent file in a single light color for contrast on the dark background. The tagline is HTML text, so it remains clear at any screen width.
 
-Compact headers pair the symbol and wordmark. The tagline is displayed separately at a readable width in desktop footers, with accessible text at small phone widths. Do not squeeze all three images into a narrow navigation bar.
+The background-removal image edit attempted on 24 September 2026 returned a painted checkerboard rather than real transparency, so that generated output was not used.
+
+## Supplied three-part 4K artwork (preserved)
+
+The `three-parts/` folder contains the user-supplied 4K symbol, SAHAAN STUDIOS wordmark, and “YOUR EXPRESSION. OUR ESSENCE.” tagline in both original PNG and web-optimized WebP formats. These originals remain untouched for future print or brand work.
+
+Do not squeeze all three images into a narrow navigation bar or display their pale image backgrounds as white cards.
 
 ## Earlier full-image logo (kept for rollback)
 
@@ -21,7 +27,7 @@ These files are no longer used by the current headers or footers. They remain av
 - `sahaan-studios-approved-4k-master.png` — earlier PNG master.
 
 - `sahaan-primary-cherry-v1.png` — full vertical logo for large placements.
-- `sahaan-horizontal-cherry-v1.png` — earlier transparent horizontal logo.
+- `sahaan-horizontal-cherry-v1.png` — current transparent horizontal website logo.
 - `sahaan-icon-cherry-v1.png` — earlier square symbol.
 
 Verify `app/globals.css`, `public/desktop/index.html`, and `public/mobile/mobile.html` at phone and desktop widths after any logo update.
