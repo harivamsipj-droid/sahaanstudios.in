@@ -329,7 +329,7 @@ textarea::placeholder {
   gap: 25px;
   margin-top: 24px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -448,6 +448,103 @@ textarea::placeholder {
 .service-rail button.active {
   background: var(--soft-gold);
   color: var(--gold-deep);
+}
+.launch-service-note {
+  padding: 72px clamp(24px, 6vw, 92px);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+.launch-service-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.launch-service-heading h2 {
+  margin: 0 0 16px;
+  font: 400 clamp(34px, 4vw, 52px)/1.05 var(--font-display);
+}
+.launch-service-heading p:not(.eyebrow) {
+  max-width: 740px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.launch-service-heading > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  color: var(--gold-deep);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.launch-price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.launch-price-grid article {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  padding: 24px;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+}
+.launch-price-grid article span {
+  color: var(--gold-deep);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.launch-price-grid article strong {
+  font: 400 24px/1.1 var(--font-display);
+}
+.launch-price-grid article b {
+  color: var(--gold-deep);
+  font-size: 17px;
+}
+.launch-price-grid article small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+@media (max-width: 1100px) {
+  .launch-price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .launch-service-note {
+    padding: 54px 18px;
+  }
+  .launch-service-heading,
+  .manual-match-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .launch-price-grid {
+    grid-template-columns: 1fr;
+  }
+  .launch-price-grid article {
+    padding: 20px;
+  }
+  .manual-match-panel > a {
+    width: 100%;
+  }
+}
+.price-disclaimer {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
 }
 .pro-section {
   padding: 100px clamp(24px, 6vw, 92px);
@@ -835,6 +932,58 @@ textarea::placeholder {
   color: var(--muted);
   line-height: 1.7;
   font-size: 14px;
+}
+.manual-match-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 850px;
+  margin: 26px auto 0;
+  padding: 22px;
+  background: var(--soft-gold);
+  border: 1px solid var(--line);
+  text-align: left;
+}
+.manual-match-panel strong {
+  display: block;
+  font: 400 23px/1.15 var(--font-display);
+}
+.manual-match-panel p,
+.manual-match-panel small {
+  display: block;
+  max-width: 520px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.manual-match-panel small {
+  font-weight: 700;
+}
+.manual-match-panel > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  min-height: 48px;
+  padding: 12px 18px;
+  background: var(--gold-deep);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+.manual-match-panel > a svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+@media (max-width: 760px) {
+  .manual-match-panel {
+    align-items: stretch;
+  }
 }
 .directory-search {
   max-width: 850px;
@@ -1259,6 +1408,11 @@ textarea::placeholder {
   padding: 70px clamp(28px, 7vw, 105px);
   align-self: center;
 }
+.partner-copy .back-link {
+  display: flex;
+  width: fit-content;
+  margin-bottom: 22px;
+}
 .founding-badge {
   display: inline-flex;
   align-items: center;
@@ -1333,7 +1487,7 @@ textarea::placeholder {
 }
 .partner-proof span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.5;
   margin-top: 5px;
 }
@@ -2809,10 +2963,13 @@ textarea::placeholder {
     margin-top: 8px;
   }
   .hero-proof {
-    overflow-x: auto;
-    white-space: nowrap;
-    gap: 18px;
-    padding-bottom: 5px;
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: visible;
+    white-space: normal;
+    gap: 11px;
+    padding: 0 2px;
+    font-size: 11px;
   }
   .market-hero-image {
     display: flex;

@@ -39,7 +39,7 @@
       input,select { width:100%; min-width:0; height:30px; padding:0; border:0; outline:0; background:transparent; color:var(--ink); font-weight:600; }
       .gold-button { min-height:54px; display:flex; align-items:center; justify-content:center; margin-top:8px; padding:0 16px; border:0; background:var(--deep); color:white; font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
       .whatsapp-contact { display:inline-flex; align-items:center; margin-top:18px; color:var(--deep); font-size:13px; font-weight:700; line-height:1.4; text-decoration:underline; text-underline-offset:4px; }
-      .proof { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:20px; color:var(--muted); font-size:7px; line-height:1.4; text-align:center; text-transform:uppercase; }
+      .proof { display:grid; grid-template-columns:1fr; gap:10px; margin-top:20px; color:var(--muted); font-size:11px; line-height:1.5; text-align:left; text-transform:uppercase; }
       .visual { display:flex; flex-direction:column; margin-top:4px; background:var(--paper); position:relative; }
       .visual::before { content:''; order:0; display:block; flex:none; height:400px; background:#d8c2a4 url('/brand/sahaan-hero-clean-v1.png') 60% center/cover no-repeat; }
       .caption { order:-1; padding:20px 18px; color:var(--deep); background:var(--paper); }
@@ -51,6 +51,14 @@
       .services { display:flex; min-height:72px; overflow-x:auto; border-block:1px solid var(--line); scrollbar-width:none; }
       .services button { flex:none; min-width:max-content; padding:0 22px; border:0; border-right:1px solid var(--line); background:transparent; color:#44372a; font:18px Georgia,serif; }
       .services span { margin-right:9px; color:var(--gold); font:italic 11px Georgia,serif; }
+      .price-guide { padding:54px 18px; background:var(--paper); border-bottom:1px solid var(--line); }
+      .price-guide h2 { margin-bottom:16px; }
+      .price-guide > p { color:var(--muted); font-size:13px; line-height:1.6; }
+      .price-grid { display:grid; gap:10px; margin-top:24px; }
+      .price-grid article { display:grid; gap:8px; padding:20px; background:var(--ivory); border:1px solid var(--line); }
+      .price-grid strong { font:23px Georgia,serif; }
+      .price-grid b { color:var(--deep); font-size:17px; }
+      .price-grid small { color:var(--muted); font-size:12px; line-height:1.5; }
       .journey { padding:65px 18px; }
       .eyebrow { color:var(--gold); font-size:9px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
       h2 { margin:10px 0 28px; font-size:37px; line-height:1.05; }
@@ -82,19 +90,20 @@
       <section class="hero-copy">
         <div class="pill">✓ Launching first in Hyderabad</div>
         <h1>Hyderabad beauty,<br /><em>one PIN code away.</em></h1>
-        <p class="intro">Discover nearby nail salons and beauty professionals. Compare ratings and reviews, with Sahaan verification shown separately.</p>
+        <p class="intro">Explore nearby Google-listed nail and beauty businesses, then ask Sahaan to help find an artist. A listing is not automatically a Sahaan partner.</p>
         <form id="find">
           <label><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" required /><small>Any six-digit Hyderabad PIN code</small></label>
-          <label><span>Service <b>Required</b></span><select name="service"><option>Gel manicure</option><option>Nail extensions</option><option>Custom nail art</option><option>Classic manicure</option></select><small>Choose the treatment you need</small></label>
-          <label><span>Preferred date <b>Required</b></span><input name="date" type="date" required /><small>We’ll show relevant availability</small></label>
-          <button class="gold-button" type="submit">⌕ &nbsp; Show my matches</button>
+          <label><span>Service <b>Required</b></span><select name="service"><option>Gel polish</option><option>Nail extensions</option><option>Custom nail art</option><option>Manicure</option></select><small>Choose the treatment you need</small></label>
+          <label><span>Preferred date <b>Required</b></span><input name="date" type="date" required /><small>For your request; not live availability</small></label>
+          <button class="gold-button" type="submit">⌕ &nbsp; Explore nearby</button>
         </form>
         <a class="whatsapp-contact" href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Questions? WhatsApp +91 81430 72723 →</a>
-        <div class="proof"><span>★ 4.9<br />average rating</span><span>100%<br />independently verified</span><span>Support<br />on every booking</span></div>
+        <div class="proof"><span>Hyderabad-first search</span><span>Google listings clearly labelled</span><span>Requests reviewed by Sahaan</span></div>
       </section>
       <section class="visual"><div class="caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div class="status"><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></section>
-      <section class="services"><button><span>01</span>Gel manicure</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Classic manicure</button></section>
-      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Enter your Hyderabad PIN</b><p>Share your location, treatment and preferred date.</p></article><article><span>02</span><b>Compare a local shortlist</b><p>Filter nearby businesses by ratings and reviews.</p></article><article><span>03</span><b>Choose with confidence</b><p>Google listings and Sahaan verification stay clearly separate.</p></article></div></section>
+      <section class="services"><button><span>01</span>Gel polish</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Manicure</button></section>
+      <section class="price-guide"><p class="eyebrow">Sahaan launch menu</p><h2>Beautiful nails, thoughtfully arranged.</h2><p>Indicative market-level starting prices for planning. Final artist availability, treatment details, travel charge and price are confirmed before booking.</p><div class="price-grid"><article><strong>Gel polish</strong><b>From ₹599</b><small>Colour only; removal or manicure care may cost extra.</small></article><article><strong>Manicure</strong><b>From ₹999</b><small>Scope and finish depend on the available artist’s quote.</small></article><article><strong>Nail extensions</strong><b>From ₹1,399</b><small>Design, length and removal are confirmed before booking.</small></article><article><strong>Custom nail art</strong><b>Quote on request</b><small>Share a design for a tailored estimate.</small></article></div><p>Guides only; not confirmed Sahaan prices or live availability.</p></section>
+      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Enter your PIN code, treatment and preferred date. This is not a confirmed slot.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
       <a class="brand-signature" href="/" aria-label="Sahaan Studios home"><span class="signature-art" aria-hidden="true"><i></i><i></i></span><span>Your expression. Our essence.</span></a>
     </main>
     <nav class="bottom-nav" aria-label="Mobile navigation"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Find</a><a href="/partners"><b>♙</b>For pros</a></nav>
@@ -109,6 +118,10 @@
         const values = new FormData(form);
         location.href = `/professionals?${new URLSearchParams(values).toString()}`;
       });
+      document.querySelectorAll('.services button').forEach((button) => button.addEventListener('click', () => {
+        form.elements.service.value = button.textContent.trim().replace(/^0[1-4]/, '').trim();
+        form.scrollIntoView({ behavior: 'smooth' });
+      }));
     </script>
   </body>
 </html>

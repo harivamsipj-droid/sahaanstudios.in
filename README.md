@@ -7,6 +7,7 @@ Hyderabad-first beauty marketplace connecting customers with independent nail an
 - Customers search by Hyderabad PIN code, service, and preferred date.
 - Professionals apply through a separate onboarding experience.
 - Google-listed businesses remain clearly separate from Sahaan-verified professionals.
+- Customers can send a manual Sahaan match request through WhatsApp; it is not a confirmed appointment.
 
 ## Local development
 
@@ -42,6 +43,8 @@ The production entry point is `hostinger-server.mjs`, which runs the Vinext buil
 - Entry file: `hostinger-server.mjs`
 
 Google Places search is configured on the host. Customer enquiries and professional applications open a click-to-chat conversation with Sahaan's temporary launch number; they are not automated bookings or a WhatsApp Business API integration. The visitor must send the prepared message in WhatsApp.
+
+The two priority pilot corridors are Kondapur–Gachibowli and Jubilee Hills–Banjara Hills. Public starting prices are **indicative market guides**, not confirmed Sahaan prices; artist availability, treatment scope, travel and final quote must be checked manually. The founder's week-one operating checklist is in `docs/launch-week-one.md`.
 
 To replace the temporary number later, update `SAHAAN_WHATSAPP_NUMBER` and `SAHAAN_WHATSAPP_DISPLAY` in `lib/contact.ts`, plus the links in both standalone HTML views (`public/desktop/index.html` and `public/mobile/mobile.html`). WhatsApp click-to-chat URLs use the full international number without a plus sign.
 

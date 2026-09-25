@@ -1,9 +1,11 @@
 import type { GooglePlaceResult } from '@/lib/google-place-types';
 
 const serviceQueries: Record<string, string> = {
+  'Gel polish': 'gel polish nail salon',
   'Gel manicure': 'gel manicure nail salon',
   'Nail extensions': 'nail extensions salon',
   'Custom nail art': 'nail art salon',
+  'Manicure': 'manicure nail salon',
   'Classic manicure': 'manicure nail salon',
   'Beauty salon': 'beauty salon',
 };
@@ -23,7 +25,7 @@ type GooglePlace = {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const pinCode = (url.searchParams.get('pin') || '').trim();
-  const service = (url.searchParams.get('service') || 'Gel manicure').trim();
+  const service = (url.searchParams.get('service') || 'Gel polish').trim();
   const businessName = (url.searchParams.get('name') || '').trim().slice(0, 80);
 
   if (!/^\d{6}$/.test(pinCode)) {
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     return Response.json({
-      error: 'Live Google Maps results are ready to connect. The Sahaan Google Places API key has not been added yet.',
+      error: 'Nearby listings are temporarily unavailable. Please send Sahaan a manual match request.',
       code: 'GOOGLE_NOT_CONNECTED',
     }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
@@ -61,7 +63,7 @@ export async function GET(request: Request) {
 
   if (!googleResponse.ok) {
     const message = googleResponse.status === 403
-      ? 'Google Places access is not active for this key. Enable Places API (New), billing, and API restrictions in Google Cloud.'
+      ? 'Nearby listings are temporarily unavailable. Please send Sahaan a manual match request.'
       : 'Google Maps could not complete this search. Please try again shortly.';
     return Response.json({ error: message, code: 'GOOGLE_REQUEST_FAILED' }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
   }
