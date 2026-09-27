@@ -1458,14 +1458,42 @@ textarea::placeholder {
   padding: 0 22px !important;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 9px !important;
+  font-size: 13px !important;
 }
 .partner-actions > a {
-  font-size: 9px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.11em;
   border-bottom: 1px solid var(--gold);
   padding-bottom: 5px;
+}
+.partner-actions > a:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 12px 22px;
+  background: var(--gold-deep);
+  border: 1px solid var(--gold-deep);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.partner-actions > a:first-child:hover,
+.partner-actions > a:first-child:focus-visible {
+  background: #513410;
+  border-color: #513410;
+}
+.partner-actions > a:first-child svg {
+  width: 18px;
+  height: 18px;
+}
+.partner-copy > .partner-quick-note {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: #4b443b;
 }
 .partner-proof {
   display: grid;
@@ -1731,6 +1759,60 @@ textarea::placeholder {
   padding: 36px;
   box-shadow: 0 24px 70px rgba(49, 36, 23, 0.08);
   min-height: 520px;
+}
+.quick-application-card {
+  min-height: 0;
+}
+.quick-application-card h3 {
+  font: 400 clamp(28px, 3vw, 38px) Georgia, serif;
+  margin: 8px 0 26px;
+  color: var(--ink);
+}
+.quick-application-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  counter-reset: quick-application;
+}
+.quick-application-list li {
+  counter-increment: quick-application;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 3px 16px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.quick-application-list li::before {
+  content: '0' counter(quick-application);
+  grid-row: span 2;
+  color: var(--gold-deep);
+  font: italic 24px Georgia, serif;
+}
+.quick-application-list strong {
+  color: var(--ink);
+  font-size: 17px;
+}
+.quick-application-list span {
+  color: #4b443b;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.quick-application-button {
+  min-height: 54px;
+  width: 100%;
+  background: var(--gold-deep) !important;
+  color: white !important;
+  font-size: 14px !important;
+}
+.quick-application-button svg {
+  width: 19px;
+  height: 19px;
+}
+.application-disclaimer {
+  color: #4b443b;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 16px 0 18px;
 }
 .form-progress > div:first-child {
   display: flex;
@@ -3303,6 +3385,9 @@ textarea::placeholder {
   .partner-actions > a {
     text-align: center;
     border: 0;
+  }
+  .partner-actions > a:first-child {
+    width: 100%;
   }
   .partner-proof {
     gap: 10px;
