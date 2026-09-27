@@ -519,7 +519,8 @@ textarea::placeholder {
 }
 .launch-price-grid article b {
   color: var(--gold-deep);
-  font-size: 17px;
+  font-size: 21px;
+  line-height: 1.2;
 }
 .launch-price-grid article small {
   color: var(--muted);
@@ -3164,7 +3165,10 @@ textarea::placeholder {
   }
   .mobile-service-picker > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .mobile-service-picker button {
-    min-height: 43px;
+    min-height: 48px;
+    display: grid;
+    align-content: center;
+    gap: 3px;
     padding: 7px 9px;
     border: 1px solid var(--line);
     border-radius: 0;
@@ -3175,6 +3179,7 @@ textarea::placeholder {
     line-height: 1.25;
     text-align: left;
   }
+  .mobile-service-picker button small { color:var(--gold-deep); font-size:11px; font-weight:800; line-height:1.2; }
   .mobile-service-picker button[aria-pressed='true'] { border-color: var(--gold-deep); background: var(--soft-gold); color: var(--gold-deep); }
   .mobile-service-picker button:focus-visible,
   .mobile-quote-cta:focus-visible,
