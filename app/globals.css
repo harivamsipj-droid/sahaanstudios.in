@@ -516,6 +516,27 @@ textarea::placeholder {
   font-size: 12px;
   line-height: 1.55;
 }
+.quote-example {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 24px;
+  background: var(--soft-gold);
+  border-left: 4px solid var(--gold-deep);
+}
+.quote-example span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--gold-deep);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.quote-example strong { display: block; font-size: 17px; line-height: 1.5; }
+.quote-example p { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.6; }
 @media (max-width: 1100px) {
   .launch-price-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -536,6 +557,7 @@ textarea::placeholder {
   .launch-price-grid article {
     padding: 20px;
   }
+  .quote-example { grid-template-columns: 1fr; padding: 20px; }
   .manual-match-panel > a {
     width: 100%;
   }
@@ -1614,6 +1636,20 @@ textarea::placeholder {
   line-height: 1.8;
   margin: 28px 0;
 }
+.rate-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  padding: 12px 0;
+  color: #f3eadf;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.rate-card-link svg { width: 17px; flex: none; }
 .earnings-copy ul {
   list-style: none;
   padding: 0;
@@ -1673,6 +1709,23 @@ textarea::placeholder {
   accent-color: var(--gold-deep);
   width: 100%;
 }
+.calculator-card input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: var(--ivory);
+  color: var(--ink);
+  font-size: 16px;
+}
+.calculator-card > label.introductory-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.calculator-card .introductory-toggle input { width: 18px; height: 18px; accent-color: var(--gold-deep); }
+.calculator-card > label.introductory-toggle > span { font-size: 12px; line-height: 1.4; letter-spacing: 0; text-transform: none; }
 .calculator-card select {
   height: 42px;
   border: 1px solid var(--line);
@@ -1690,8 +1743,10 @@ textarea::placeholder {
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 10px;
+  gap: 12px;
+  font-size: 13px;
 }
+.earnings-breakdown > span strong { flex: none; color: var(--ink); }
 .earnings-breakdown > div {
   background: var(--soft-gold);
   padding: 18px;
@@ -1699,7 +1754,7 @@ textarea::placeholder {
   justify-content: space-between;
   align-items: center;
   color: var(--gold-deep);
-  font-size: 10px;
+  font-size: 13px;
 }
 .earnings-breakdown > div strong {
   font:
@@ -1710,7 +1765,7 @@ textarea::placeholder {
   display: block;
   margin-top: 14px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .application-section {
