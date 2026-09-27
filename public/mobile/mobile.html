@@ -81,38 +81,95 @@
       .bottom-nav a:first-child { color:var(--deep); }
       .bottom-nav b { font-size:18px; line-height:1; }
       @media (max-width:350px) { .brand { width:198px; height:60px; } .brand::before { width:50px; height:50px; } .brand::after { width:140px; height:38px; } .pro-link { font-size:9px; } h1 { font-size:38px; } }
+      body { padding-bottom:calc(70px + env(safe-area-inset-bottom)); }
+      header { height:66px; padding:0 14px; }
+      .hero-copy { padding:24px 18px 22px; }
+      .pill { margin-bottom:14px; font-size:9px; }
+      h1 { font-size:clamp(37px,10vw,43px); line-height:1.02; }
+      .intro { margin:15px 0 18px; font-size:15px; line-height:1.5; }
+      form { padding:14px; scroll-margin-top:78px; }
+      .mobile-services { margin:0; padding:0 0 12px; border:0; border-bottom:1px solid var(--line); }
+      .mobile-services legend { padding-bottom:10px; font-size:13px; font-weight:800; }
+      .mobile-services > div { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .mobile-services button { min-height:43px; padding:7px 9px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-size:13px; font-weight:600; text-align:left; }
+      .mobile-services button[aria-pressed="true"] { border-color:var(--deep); background:var(--soft); color:var(--deep); }
+      .legacy-service { display:none; }
+      label { padding:11px 2px; }
+      label span { font-size:10px; }
+      input,select { font-size:16px; }
+      .gold-button { min-height:50px; margin-top:12px; font-size:12px; }
+      .quote-button { display:flex; align-items:center; justify-content:center; min-height:49px; margin-top:10px; border:1px solid var(--deep); color:var(--deep); font-size:14px; font-weight:700; }
+      .request-note { margin:9px 0 0; color:var(--muted); font-size:11px; line-height:1.45; }
+      .proof,.caption,.status { display:none; }
+      .visual::before { height:230px; }
+      .bottom-nav { height:calc(70px + env(safe-area-inset-bottom)); }
+      .bottom-nav a { font-size:10px; font-weight:700; }
+      .bottom-nav b { font-size:20px; }
+      .mobile-services button:focus-visible,.quote-button:focus-visible,.bottom-nav a:focus-visible { outline:2px solid var(--deep); outline-offset:2px; }
+      .menu-toggle { display:grid; place-items:center; width:44px; height:44px; border:0; background:transparent; color:var(--deep); font-size:25px; cursor:pointer; }
+      .menu-toggle:focus-visible,.mobile-menu a:focus-visible { outline:2px solid var(--deep); outline-offset:2px; }
+      .mobile-menu { position:absolute; top:100%; left:0; right:0; display:grid; padding:12px 18px 20px; background:var(--paper); border-bottom:1px solid var(--line); box-shadow:0 18px 32px rgba(38,33,28,.14); }
+      .mobile-menu[hidden] { display:none; }
+      .mobile-menu a { display:flex; align-items:center; min-height:50px; padding:0 8px; border-bottom:1px solid var(--line); color:var(--ink); font-size:13px; font-weight:600; }
+      .mobile-menu a:last-child { border-bottom:0; color:var(--deep); }
     </style>
   </head>
   <body>
     <!-- MOBILE VIEW: edit this file for the dedicated 320–480px HTML reference. -->
-    <header><a class="brand" href="/" aria-label="Sahaan Studios home"></a><a class="pro-link" href="/partners">For pros</a></header>
+    <header><a class="brand" href="/" aria-label="Sahaan Studios home"></a><button class="menu-toggle" type="button" aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">☰</button><nav class="mobile-menu" id="mobile-menu" aria-label="Mobile customer navigation" hidden><a href="#find">Explore nearby</a><a href="#services">Services</a><a href="#how">How it works</a><a href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">WhatsApp Sahaan</a><a href="/partners">For professionals</a></nav></header>
     <main>
       <section class="hero-copy">
         <div class="pill">✓ Launching first in Hyderabad</div>
-        <h1>Hyderabad beauty,<br /><em>one PIN code away.</em></h1>
-        <p class="intro">Explore nearby Google-listed nail and beauty businesses, then ask Sahaan to help find an artist. A listing is not automatically a Sahaan partner.</p>
+        <h1>Beautiful nails,<br /><em>closer to home.</em></h1>
+        <p class="intro">Choose a service and your area. Explore nearby or ask Sahaan for a personal quote.</p>
         <form id="find">
+          <fieldset class="mobile-services"><legend>What would you like done?</legend><div><button type="button" aria-pressed="true">Gel polish</button><button type="button" aria-pressed="false">Nail extensions</button><button type="button" aria-pressed="false">Custom nail art</button><button type="button" aria-pressed="false">Manicure</button></div></fieldset>
           <label><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" required /><small>Any six-digit Hyderabad PIN code</small></label>
-          <label><span>Service <b>Required</b></span><select name="service"><option>Gel polish</option><option>Nail extensions</option><option>Custom nail art</option><option>Manicure</option></select><small>Choose the treatment you need</small></label>
-          <label><span>Preferred date <b>Required</b></span><input name="date" type="date" required /><small>For your request; not live availability</small></label>
+          <label class="legacy-service"><span>Service <b>Required</b></span><select name="service"><option>Gel polish</option><option>Nail extensions</option><option>Custom nail art</option><option>Manicure</option></select></label>
+          <label><span>Preferred date <small>Optional</small></span><input name="date" type="date" /><small>We’ll confirm the appointment time later</small></label>
           <button class="gold-button" type="submit">⌕ &nbsp; Explore nearby</button>
         </form>
-        <a class="whatsapp-contact" href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Questions? WhatsApp +91 81430 72723 →</a>
+        <a class="quote-button" data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Ask Sahaan for a quote →</a>
+        <p class="request-note">No payment or booking yet. Public Google listings are not automatically Sahaan partners.</p>
         <div class="proof"><span>Hyderabad-first search</span><span>Google listings clearly labelled</span><span>Requests reviewed by Sahaan</span></div>
       </section>
       <section class="visual"><div class="caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div class="status"><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></section>
-      <section class="services"><button><span>01</span>Gel polish</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Manicure</button></section>
+      <section class="services" id="services"><button><span>01</span>Gel polish</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Manicure</button></section>
       <section class="price-guide"><p class="eyebrow">Personalised pricing</p><h2>A clear quote before you book.</h2><p>Tell us the treatment, design or add-ons you want and where you need the service. We’ll confirm availability and share your full price before you decide.</p><div class="price-grid"><article><strong>Gel polish</strong><b>Quote on request</b><small>Application, removal and nail care depend on the work required.</small></article><article><strong>Manicure</strong><b>Quote on request</b><small>The treatment, products and time are confirmed in your quote.</small></article><article><strong>Nail extensions</strong><b>Quote on request</b><small>Length, materials and design are considered.</small></article><article><strong>Custom nail art</strong><b>Quote on request</b><small>Share a design for a tailored quote.</small></article></div><p>Your final quote will show the service, travel, any additional charges and the total before payment or booking. A PIN code alone cannot confirm travel cost.</p></section>
-      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Enter your PIN code, treatment and preferred date. This is not a confirmed slot.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
+      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Choose a treatment and enter your PIN code. Add a preferred date if you have one.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
       <a class="brand-signature" href="/" aria-label="Sahaan Studios home"><span class="signature-art" aria-hidden="true"><i></i><i></i></span><span>Your expression. Our essence.</span></a>
     </main>
-    <nav class="bottom-nav" aria-label="Mobile navigation"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Find</a><a href="/partners"><b>♙</b>For pros</a></nav>
+    <nav class="bottom-nav" aria-label="Customer shortcuts"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Explore</a><a data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer"><b>✧</b>Get quote</a></nav>
     <script>
       const form = document.querySelector('#find');
+      const menuButton = document.querySelector('.menu-toggle');
+      const menu = document.querySelector('#mobile-menu');
+      const closeMenu = () => { menu.hidden = true; menuButton.setAttribute('aria-expanded', 'false'); menuButton.setAttribute('aria-label', 'Open menu'); menuButton.textContent = '☰'; };
+      menuButton.addEventListener('click', () => {
+        const open = menu.hidden;
+        menu.hidden = !open;
+        menuButton.setAttribute('aria-expanded', String(open));
+        menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        menuButton.textContent = open ? '×' : '☰';
+      });
+      menu.addEventListener('click', (event) => { if (event.target.closest('a')) closeMenu(); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
+      document.addEventListener('pointerdown', (event) => { if (!event.target.closest('header')) closeMenu(); });
       const pin = form.elements.pin;
       const date = form.elements.date;
       date.min = new Date().toISOString().split('T')[0];
       pin.addEventListener('input', () => { pin.value = pin.value.replace(/\D/g, '').slice(0, 6); });
+      const updateQuoteLinks = () => {
+        const message = `Hi Sahaan! I’d like a quote for ${form.elements.service.value}.\nHyderabad PIN code: ${pin.value || '[please share your PIN code]'}\nPreferred date: ${date.value || '[please share a date if you have one]'}\nDesign or treatment details: [please describe or attach a photo]\nService address for travel: [please share privately here]\n\nPlease confirm the service, travel, any additional charges and final total before booking.`;
+        document.querySelectorAll('[data-quote-link]').forEach((link) => { link.href = `https://wa.me/918143072723?text=${encodeURIComponent(message)}`; });
+      };
+      form.addEventListener('input', updateQuoteLinks);
+      document.querySelectorAll('.mobile-services button').forEach((button) => button.addEventListener('click', () => {
+        form.elements.service.value = button.textContent.trim();
+        document.querySelectorAll('.mobile-services button').forEach((choice) => choice.setAttribute('aria-pressed', String(choice === button)));
+        updateQuoteLinks();
+      }));
+      updateQuoteLinks();
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         const values = new FormData(form);

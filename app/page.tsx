@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { ArrowRight, CalendarDays, ChevronDown, Clock3, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Users, X } from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronDown, Clock3, Home, MapPin, Menu, MessageCircle, Search, ShieldCheck, Sparkles, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SAHAAN_WHATSAPP_DISPLAY, sahaanWhatsAppUrl } from '@/lib/contact';
@@ -14,6 +14,7 @@ export default function HomePage() {
   const [date, setDate] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const quoteMessage = `Hi Sahaan! I’d like a quote for ${service}.\nHyderabad PIN code: ${pinCode || '[please share your PIN code]'}\nPreferred date: ${date || '[please share a date if you have one]'}\nDesign or treatment details: [please describe or attach a photo]\nService address for travel: [please share privately here]\n\nPlease confirm the service, travel, any additional charges and final total before booking.`;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -58,14 +59,18 @@ export default function HomePage() {
     <section className="market-hero">
       <div className="market-hero-copy">
         <div className="trusted-pill"><ShieldCheck size={15} /> Launching first in Hyderabad</div>
-        <h1>Hyderabad beauty,<br /><em>one PIN code away.</em></h1>
-        <p>Explore nail and beauty businesses near your Hyderabad PIN code, then ask Sahaan to help find an available artist. Google-listed businesses are not automatically Sahaan partners.</p>
+        <h1><span className="desktop-hero-title">Hyderabad beauty,<br /><em>one PIN code away.</em></span><span className="mobile-hero-title">Beautiful nails,<br /><em>closer to home.</em></span></h1>
+        <p className="desktop-hero-intro">Explore nail and beauty businesses near your Hyderabad PIN code, then ask Sahaan to help find an available artist. Google-listed businesses are not automatically Sahaan partners.</p>
+        <p className="mobile-hero-intro">Choose a service and your area. Explore nearby or ask Sahaan for a personal quote.</p>
         <form className="search-panel" id="find" role="search" onSubmit={findProfessionals}>
+          <fieldset className="mobile-service-picker"><legend>What would you like done?</legend><div>{services.map((item) => <button type="button" key={item} aria-pressed={service === item} onClick={() => setService(item)}>{item}</button>)}</div></fieldset>
           <label><span className="field-title"><MapPin size={15} /> Hyderabad PIN code <b>Required</b></span><Input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={pinCode} onChange={(e) => setPinCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g. 500034" aria-describedby="location-help" /><small id="location-help">Any six-digit PIN code in Hyderabad</small></label>
-          <label><span className="field-title"><Sparkles size={15} /> Service <b>Required</b></span><div className="native-select"><select required aria-label="Choose a service" value={service} onChange={(e) => setService(e.target.value)}>{services.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} /></div><small>Choose the treatment you need</small></label>
-          <label><span className="field-title"><CalendarDays size={15} /> Preferred date <b>Required</b></span><Input required value={date} onChange={(e) => setDate(e.target.value)} type="date" min={new Date().toISOString().split('T')[0]} /><small>For your request; not live availability</small></label>
+          <label className="service-select-field"><span className="field-title"><Sparkles size={15} /> Service <b>Required</b></span><div className="native-select"><select required aria-label="Choose a service" value={service} onChange={(e) => setService(e.target.value)}>{services.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} /></div><small>Choose the treatment you need</small></label>
+          <label><span className="field-title"><CalendarDays size={15} /> Preferred date <i>Optional</i></span><Input value={date} onChange={(e) => setDate(e.target.value)} type="date" min={new Date().toISOString().split('T')[0]} /><small>We’ll confirm the appointment time later</small></label>
           <Button type="submit" className="find-button"><Search /> Explore nearby</Button>
         </form>
+        <a className="mobile-quote-cta" href={sahaanWhatsAppUrl(quoteMessage)} target="_blank" rel="noopener noreferrer"><MessageCircle size={19} /> Ask Sahaan for a quote <ArrowRight size={17} /></a>
+        <p className="mobile-request-note">No payment or booking yet. Public Google listings are not automatically Sahaan partners.</p>
         <div className="hero-proof"><span><MapPin size={14} /> Hyderabad-first search</span><span><ShieldCheck size={14} /> Google listings clearly labelled</span><span><Clock3 size={14} /> Requests reviewed by Sahaan</span></div>
       </div>
       <div className="market-hero-image"><div className="image-caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div className="availability-card"><span className="status-dot" /><div><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></div></div>
@@ -76,12 +81,12 @@ export default function HomePage() {
 
     <section className="customer-journey" id="how">
       <div className="section-title"><div><p className="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See only relevant professionals.</h2></div></div>
-      <div className="journey-grid"><article><span>01</span><MapPin /><strong>Share your request</strong><p>Enter your PIN code, treatment and preferred date. This is not a confirmed slot.</p></article><article><span>02</span><Search /><strong>Explore local listings</strong><p>Compare Google-listed businesses by rating and review count. A listing is not a Sahaan partner.</p></article><article><span>03</span><CalendarDays /><strong>Ask Sahaan to match you</strong><p>We check artist availability and share the exact scope and price before you decide.</p></article></div>
+      <div className="journey-grid"><article><span>01</span><MapPin /><strong>Share your request</strong><p>Choose a treatment and enter your PIN code. Add a preferred date if you have one.</p></article><article><span>02</span><Search /><strong>Explore local listings</strong><p>Compare Google-listed businesses by rating and review count. A listing is not a Sahaan partner.</p></article><article><span>03</span><CalendarDays /><strong>Ask Sahaan to match you</strong><p>We check artist availability and share the exact scope and price before you decide.</p></article></div>
       <Button className="journey-button" render={<a href="#find" />}>Start your search <ArrowRight /></Button>
     </section>
 
     <section className="trust-band" id="trust"><div><ShieldCheck /><strong>Verification before activation</strong><p>Artists must complete portfolio, identity and service-standard checks before receiving a Sahaan verified badge.</p></div><div><Users /><strong>Listings are not partners</strong><p>Google Maps results are public business listings. Sahaan partners are identified separately after onboarding.</p></div><div><Home /><strong>Home-service planning</strong><p>We confirm service area, timing, hygiene expectations and price with you before any appointment.</p></div></section>
     <footer className="market-footer"><a className="market-footer-logo" href="/" aria-label="Sahaan Studios home"><span aria-hidden="true" /><span aria-hidden="true" /></a><div><strong>Customers</strong><a href="/professionals">Search Hyderabad</a><a href="#services">Explore services</a><a href="#how">How Sahaan works</a><a className="footer-whatsapp" href={sahaanWhatsAppUrl()} target="_blank" rel="noopener noreferrer">WhatsApp {SAHAAN_WHATSAPP_DISPLAY}</a></div><div><strong>Professionals</strong><a href="/partners">Apply to join</a><a href="/partners#earnings">Quote estimator</a><a href="/partners#application">Apply on WhatsApp</a></div><div><strong>Trust & legal</strong><a href="#trust">Verification standards</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms of use</a></div><p className="market-footer-tagline"><img src="/brand/web/sahaan-tagline-web.png" alt="Your expression. Our essence." loading="lazy" /><span>Your expression. Our essence.</span></p><small>© 2026 Sahaan · Hyderabad launch marketplace for independent beauty professionals. Google-listed businesses are not automatically Sahaan-verified.</small></footer>
-    <div className="mobile-nav"><a href="/"><Home /><span>Home</span></a><a href="#find"><Search /><span>Find</span></a><a href="/partners"><Users /><span>For pros</span></a></div>
+    <div className="mobile-nav" aria-label="Customer shortcuts"><a className="current" href="/"><Home /><span>Home</span></a><a href="#find"><Search /><span>Explore</span></a><a href={sahaanWhatsAppUrl(quoteMessage)} target="_blank" rel="noopener noreferrer"><MessageCircle /><span>Get quote</span></a></div>
   </main>;
 }
