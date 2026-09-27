@@ -3823,3 +3823,43 @@ textarea::placeholder {
   .directory-search .directory-location-choice button { flex:1; min-height:48px; font-size:12px !important; }
   .directory-location-note { font-size:11px; padding:0 5px; }
 }
+.managed-booking-page { min-height:100vh; background:#f8f5ef; color:#241f19; font-family:Arial, sans-serif; }
+.managed-booking-page > header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px clamp(20px,5vw,80px); border-bottom:1px solid #ded4c5; }
+.managed-booking-page > header a { color:#4b1830; text-decoration:none; font:32px Georgia,serif; letter-spacing:.11em; }
+.managed-booking-page > header a span { display:block; font:10px Arial,sans-serif; letter-spacing:.4em; text-align:center; }
+.managed-booking-page > header > span { font-size:12px; color:#75532d; text-transform:uppercase; letter-spacing:.12em; }
+.managed-booking-card { max-width:740px; margin:52px auto; padding:clamp(24px,5vw,56px); background:#fff; border:1px solid #ded4c5; box-shadow:0 15px 60px #3b250f0b; }
+.managed-booking-card h1 { margin:12px 0; font:clamp(34px,6vw,53px)/1.1 Georgia,serif; }
+.managed-booking-intro { color:#665a4d; }
+.managed-booking-details { margin:30px 0; display:grid; gap:0; }
+.managed-booking-details > div { display:grid; grid-template-columns:160px 1fr; gap:16px; padding:12px 0; border-bottom:1px solid #eee8df; }
+.managed-booking-details dt { font-size:13px; font-weight:700; color:#75532d; }
+.managed-booking-details dd { margin:0; line-height:1.5; overflow-wrap:anywhere; }
+.managed-booking-total { padding:18px 20px; background:#f4eee5; }
+.managed-booking-total > div { display:flex; justify-content:space-between; gap:20px; padding:8px 0; }
+.managed-booking-total .final { margin-top:8px; padding-top:16px; border-top:1px solid #cdbda8; font-size:21px; }
+.managed-booking-notice { padding:18px 20px; border-left:4px solid #75532d; background:#f8f5ef; line-height:1.6; }
+.managed-booking-consent { display:flex; align-items:flex-start; gap:12px; margin:24px 0; line-height:1.5; }
+.managed-booking-consent input { width:18px; height:18px; margin-top:3px; flex:none; }
+.managed-booking-consent a,.managed-booking-help { color:#75532d; font-weight:700; }
+.managed-booking-card > button { display:block; width:100%; min-height:56px; border:0; background:#75532d; color:#fff; font-size:16px; font-weight:800; cursor:pointer; }
+.managed-booking-card > button:disabled { opacity:.55; cursor:not-allowed; }
+.managed-booking-card > small { display:block; margin-top:12px; color:#665a4d; line-height:1.5; }
+.managed-booking-error { padding:14px; color:#8b1d1d; background:#fff0ed; }
+.managed-booking-help { display:inline-block; margin-top:25px; }
+@media(max-width:600px) { .managed-booking-page > header { padding:18px; } .managed-booking-page > header a { font-size:24px; } .managed-booking-page > header > span { font-size:10px; } .managed-booking-card { margin:18px 12px 80px; } .managed-booking-details > div { grid-template-columns:1fr; gap:5px; } }
+.booking-desk { max-width:1050px; margin:40px auto 100px; padding:0 20px; color:#241f19; }
+.booking-desk h1,.booking-desk h2 { font-family:Georgia,serif; }
+.booking-desk h1 { font-size:42px; }
+.booking-desk section { margin-top:32px; padding:28px; border:1px solid #ded4c5; background:#fff; }
+.booking-desk form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:22px; }
+.booking-desk label { display:grid; gap:6px; font-weight:700; font-size:13px; }
+.booking-desk input { width:100%; min-height:44px; padding:9px 11px; border:1px solid #ad9c87; background:#fff; color:#241f19; font-size:15px; }
+.booking-desk input[type='checkbox'] { width:18px; min-height:18px; height:18px; margin-right:8px; padding:0; vertical-align:middle; }
+.booking-desk button { align-self:end; min-height:44px; padding:10px 18px; border:0; background:#75532d; color:white; font-weight:800; cursor:pointer; }
+.booking-desk button:disabled { opacity:.5; cursor:not-allowed; }
+.booking-desk > button { margin-top:12px; }
+.booking-desk > label { max-width:430px; }
+.booking-desk li { display:grid; gap:4px; padding:14px 0; border-bottom:1px solid #ded4c5; }
+.booking-desk li code,.booking-desk-link { overflow-wrap:anywhere; }
+@media(max-width:650px) { .booking-desk form { grid-template-columns:1fr; } .booking-desk section { padding:18px; } }

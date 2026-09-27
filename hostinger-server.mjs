@@ -5,6 +5,7 @@ import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
 import worker from './dist/server/index.js';
+import { drainBookingNotifications, handleManagedBooking } from './server/managed-bookings.mjs';
 
 const root = resolve(fileURLToPath(new URL('./dist/client/', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
@@ -77,11 +78,14 @@ const server = createServer(async (incoming, outgoing) => {
     // Hostinger does not provide Cloudflare's static-asset binding at runtime.
     // Serve the generated client files directly before handing application
     // routes to the Vinext worker so CSS, JavaScript, fonts, and images load.
-    const staticResponse = method === 'GET' || method === 'HEAD'
+    const bookingResponse = url.pathname.startsWith('/api/managed-bookings/')
+      ? await handleManagedBooking(request)
+      : null;
+    const staticResponse = !bookingResponse && (method === 'GET' || method === 'HEAD')
       ? await assets.fetch(request)
       : null;
 
-    const response = staticResponse && staticResponse.status !== 404
+    const response = bookingResponse || (staticResponse && staticResponse.status !== 404
       ? staticResponse
       : await worker.fetch(
           request,
@@ -92,7 +96,7 @@ const server = createServer(async (incoming, outgoing) => {
               Promise.resolve(promise).catch(console.error);
             },
           },
-        );
+        ));
 
     outgoing.statusCode = response.status;
     outgoing.statusMessage = response.statusText;
@@ -122,3 +126,7 @@ const server = createServer(async (incoming, outgoing) => {
 server.listen(port, '0.0.0.0', () => {
   console.log(`Sahaan is listening on port ${port}`);
 });
+
+setInterval(() => {
+  drainBookingNotifications().catch((error) => console.error('Booking notification retry:', error));
+}, 60_000).unref();

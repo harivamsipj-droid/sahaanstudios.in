@@ -37,3 +37,10 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+*.tsbuildinfo

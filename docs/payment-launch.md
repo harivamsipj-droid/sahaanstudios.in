@@ -1,0 +1,40 @@
+# Sahaan managed-payment launch checklist
+
+The code is **off by default**. Publishing the website does not activate payment collection. The founder must complete and test every item below before setting `SAHAAN_PAYMENTS_ENABLED=1` and `SAHAAN_POLICY_APPROVED=1` in the private hosting environment. Never put a live API key, admin token, customer address or booking database in GitHub.
+
+## Customer and professional journey
+
+1. Customer enquires; Sahaan confirms the work, service address, feasible appointment window and **final itemised amount**. Before creating the pay link, staff checks an eligible artist's rate, travel and availability (ideally with a fallback who can honour the same total). The named professional can be finalised after payment, but the price must not be guessed. Market guide prices on the public homepage are not payable quotes.
+2. Sahaan creates an expiring, private quote in `/admin/bookings` and sends its `/book/<private-token>` link only to that customer. The customer reviews the fixed service, travel, extras, tax and total and explicitly agrees to WhatsApp updates and the published terms.
+3. The website creates a Razorpay **Order** for that exact amount. Razorpay Standard Checkout opens on the Sahaan page. The secret key remains server-side.
+4. Sahaan verifies the Checkout signature and **captured** payment server-side, and also accepts a signed `payment.captured` webhook. The paid request is stored as `paid_unassigned`, not falsely shown as an artist-confirmed appointment. The server queues a WhatsApp payment acknowledgement for the customer.
+5. Sahaan checks the professional and assigns them in `/admin/bookings`. The server queues a customer update with the professional's name and time window, and a professional update with the service, time, address and customer contact. The booking desk shows whether Meta accepted each message request or returned an error; staff must confirm actual delivery and acknowledgement separately.
+6. If Sahaan cannot arrange the agreed service, offer a new appointment or **full refund**. During the launch pilot, any customer cancellation before work starts is fully refundable. Sahaan must initiate approved refunds manually in Razorpay until an audited refund workflow is added.
+
+## Required private services and settings
+
+- **Razorpay:** finish account activation/KYC, enable automatic capture, generate **test** API keys first, create a strong webhook secret, and register `https://sahaanstudios.in/api/managed-bookings/webhook` for `payment.captured` and `refund.processed`. Test the order, signature, webhook, duplicate delivery and refund path. Only then replace the test keys with live keys in Hostinger's private environment. Do not paste keys into chat or GitHub. The [Razorpay integration guide](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/) requires server-side Orders and signature verification; its [refund documentation](https://razorpay.com/docs/payments/payments/dashboard/) covers manual refunds.
+- **Meta WhatsApp Business Platform:** create or access a Meta business portfolio and WhatsApp Business Account, set up a business sender number, obtain a server-side access token with messaging permission and the phone-number ID, and submit the three utility templates below for approval. Use Meta's test sender/number during development. Check whether the temporary `8143072723` number is currently used in the WhatsApp app before attempting to register or migrate it; do not risk interrupting ongoing conversations. A dedicated business number is safest until an official coexistence path is confirmed. [Meta's official Cloud API collection](https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api) lists the required assets and message endpoint.
+- **Persistent private storage:** provide `SAHAAN_DATA_FILE` as an **absolute path outside the deployment directory**, writable by the Node process and inaccessible from the web. Verify that Hostinger retains this exact location across deployments and restarts, and set up encrypted backups and restore tests. The pilot uses Node's SQLite module; do **not** enable payments if the hosting plan cannot guarantee durable storage. For multiple server instances or significant volume, replace it with a managed transactional database before launch.
+- **Admin access:** generate a unique random `SAHAAN_ADMIN_TOKEN` of at least 32 characters, save it only in private host settings/password manager, and share it only with authorised staff. The booking desk keeps it in the current browser tab's memory, not local storage. Use HTTPS only.
+- **Policy and operations:** approve the published cancellation/refund wording, update the grievance contact if needed, review Terms and Privacy with Indian counsel, and verify Sahaan can initiate refunds within the promised two business days. Define the internal time limit for matching an artist and monitoring unassigned paid requests. Do not accept payment when staff cannot monitor the queue.
+
+## WhatsApp templates to submit to Meta
+
+Template language must match `META_TEMPLATE_LANGUAGE` (for example `en_US`). The approved template names must match the private environment variables. The placeholder order is part of the code contract:
+
+1. `META_TEMPLATE_PAYMENT` — customer: `Hi {{1}}, Sahaan received your payment for request {{2}} ({{3}}, total {{4}}). We are finalising your professional and will send another update. If we cannot arrange the agreed service, you can choose a new time or a full refund. Questions: reply here.`
+2. `META_TEMPLATE_CUSTOMER_ASSIGNED` — customer: `Hi {{1}}, your Sahaan request {{2}} is assigned to {{3}} for {{4}}. Please reply here if you need help or need to cancel before work starts.`
+3. `META_TEMPLATE_ARTIST_ASSIGNED` — professional: `Hi {{1}}, Sahaan assigned request {{2}}: {{3}} on {{4}} at {{5}}. Customer contact: {{6}}. Please acknowledge with Sahaan and follow the agreed service and hygiene standards.`
+
+The artist's template includes a customer's exact address and phone number **only after assignment**. The checkout records the customer's affirmative agreement to WhatsApp updates. Confirm Meta's template category, opt-in and privacy requirements during setup. Template approval and a successful API response do not prove delivery; the pilot booking desk needs regular review of message status and customer replies.
+
+## Test and go-live gate
+
+1. Keep `SAHAAN_PAYMENTS_ENABLED=0` while setting up. A health check at `/api/managed-bookings/health` should report disabled.
+2. Configure test keys and Meta test sender. Set `SAHAAN_POLICY_APPROVED=1` only after founder/legal review, and temporarily set the payment switch to `1` in a controlled test deployment.
+3. Create a test quote, open it on desktop and mobile, complete a Razorpay **test** transaction, confirm the server marks it `paid_unassigned`, and verify exactly one customer notification.
+4. Assign a test professional and confirm both customer and artist updates. Replay a signed webhook and confirm it does not create another booking. Test failure, cancellation, no-match and refund handling.
+5. Check backups and restore a copy of the booking database. Confirm restricted file permissions, monitoring and on-call coverage. Then install live keys and approve the public launch.
+
+The current implementation does **not** automatically issue refunds, make artist payouts, send invoices, or reconcile bank settlements. These remain manual founder tasks during the pilot. It does not charge a customer based on the public price guide or a Google-listed business profile.
