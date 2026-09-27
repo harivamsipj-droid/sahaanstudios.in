@@ -3782,3 +3782,39 @@ textarea::placeholder {
     scroll-behavior: auto;
   }
 }
+
+/* Location-first customer discovery; PIN search remains an accessible fallback. */
+.search-panel.manual-area-active { grid-template-columns: 1.2fr 1fr 1fr .9fr auto; min-width: 940px; }
+.location-choice { display:grid; grid-template-columns:20px minmax(0,1fr); align-content:center; column-gap:8px; row-gap:4px; min-width:0; padding:10px 12px; border-right:1px solid var(--line); }
+.location-choice > svg { flex:none; color:var(--gold-deep); }
+.location-choice > div { display:grid; gap:3px; min-width:0; }
+.location-choice strong { color:var(--ink); font-size:13px; line-height:1.25; }
+.location-choice small { color:var(--muted); font-size:10px; line-height:1.35; }
+.location-choice button { grid-column:2; justify-self:start; padding:0; border:0; background:none; color:var(--gold-deep); font-size:11px; font-weight:800; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.search-panel .find-button, .directory-search > button[type='submit'] { color:#fff !important; }
+.location-privacy, .directory-location-note { color:var(--muted); font-size:11px; line-height:1.5; }
+.market-hero-copy > .location-privacy { margin:10px 0 0; }
+.market-hero-copy > .location-error { margin:10px 0 0; color:#8b2e1f; font-size:12px; font-weight:700; }
+.location-error button { border:0; background:none; color:var(--gold-deep); font-weight:800; text-decoration:underline; cursor:pointer; }
+.pin-search.manual-area-active { max-width:1000px; grid-template-columns:1.3fr 1fr 1fr auto; }
+.directory-location-choice { display:flex; min-width:0; align-items:center; gap:6px; padding:5px; }
+.directory-search .directory-location-choice button { display:flex; align-items:center; justify-content:center; gap:5px; min-height:44px; height:auto !important; padding:5px 10px !important; border:1px solid var(--line) !important; background:var(--paper) !important; color:var(--gold-deep) !important; font-size:11px !important; font-weight:800; line-height:1.2; cursor:pointer; }
+.directory-search .directory-location-choice button.selected { border-color:var(--gold-deep) !important; background:var(--soft-gold) !important; }
+.directory-location-choice svg { width:15px; height:15px; flex:none; }
+.directory-location-note { max-width:760px; margin:10px auto 0; text-align:center; }
+.place-distance { margin:5px 0 12px; color:var(--gold-deep); font-size:12px; font-weight:700; }
+@media (max-width: 760px) {
+  .search-panel, .search-panel.manual-area-active { grid-template-columns:minmax(0,1fr); min-width:0; }
+  .search-panel > * { min-width:0; max-width:100%; }
+  .search-panel .find-button { order:1; }
+  .search-panel .preferred-date-field { order:2; }
+  .location-choice { display:flex; align-items:center; gap:10px; padding:13px 2px; border-right:0; border-bottom:1px solid var(--line); }
+  .location-choice strong { font-size:14px; }
+  .location-choice small { font-size:11px; }
+  .location-choice button { flex:none; font-size:11px; }
+  .market-hero-copy > .location-privacy { margin-top:9px; font-size:11px; }
+  .pin-search.manual-area-active { grid-template-columns:1fr; }
+  .directory-location-choice { justify-content:stretch; padding:2px 0 7px; }
+  .directory-search .directory-location-choice button { flex:1; min-height:48px; font-size:12px !important; }
+  .directory-location-note { font-size:11px; padding:0 5px; }
+}

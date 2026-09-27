@@ -4,7 +4,7 @@ Hyderabad-first beauty marketplace connecting customers with independent nail an
 
 ## Main journeys
 
-- Customers search by Hyderabad PIN code, service, and preferred date.
+- Customers choose a service and find nearby Google listings using browser-permitted approximate location; Hyderabad PIN-code search remains a fallback. Preferred date is optional.
 - Professionals apply through a separate onboarding experience.
 - Google-listed businesses remain clearly separate from Sahaan-verified professionals.
 - Customers can send a manual Sahaan match request through WhatsApp; it is not a confirmed appointment.

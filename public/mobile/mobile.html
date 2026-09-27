@@ -112,6 +112,14 @@
       .mobile-menu[hidden] { display:none; }
       .mobile-menu a { display:flex; align-items:center; min-height:50px; padding:0 8px; border-bottom:1px solid var(--line); color:var(--ink); font-size:13px; font-weight:600; }
       .mobile-menu a:last-child { border-bottom:0; color:var(--deep); }
+      .location-choice { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:64px; padding:10px 2px; border-bottom:1px solid var(--line); }
+      .location-choice strong,.location-choice small { display:block; }
+      .location-choice strong { font-size:14px; }
+      .location-choice small { margin-top:3px; color:var(--muted); font-size:11px; line-height:1.35; }
+      .location-choice button { flex:none; padding:0; border:0; background:none; color:var(--deep); font-size:11px; font-weight:800; text-decoration:underline; cursor:pointer; }
+      .manual-pin[hidden] { display:none; }
+      .location-privacy { margin:9px 0 0; color:var(--muted); font-size:11px; line-height:1.45; }
+      .location-error { margin:10px 0 0; color:#8b2e1f; font-size:12px; font-weight:700; }
     </style>
   </head>
   <body>
@@ -121,14 +129,17 @@
       <section class="hero-copy">
         <div class="pill">✓ Launching first in Hyderabad</div>
         <h1>Beautiful nails,<br /><em>closer to home.</em></h1>
-        <p class="intro">Choose a service and your area. Explore nearby or ask Sahaan for a personal quote.</p>
+        <p class="intro">Choose a service. We’ll show nearby options using your location, with your permission.</p>
         <form id="find">
           <fieldset class="mobile-services"><legend>What would you like done?</legend><div><button type="button" aria-pressed="true">Gel polish</button><button type="button" aria-pressed="false">Nail extensions</button><button type="button" aria-pressed="false">Custom nail art</button><button type="button" aria-pressed="false">Manicure</button></div></fieldset>
-          <label><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" required /><small>Any six-digit Hyderabad PIN code</small></label>
+          <div class="location-choice"><div><strong>Find beauty near me</strong><small>Your browser will ask to use your location</small></div><button type="button" id="area-toggle">Use PIN instead</button></div>
+          <label class="manual-pin" hidden><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" /><small>Any six-digit Hyderabad PIN code</small></label>
           <label class="legacy-service"><span>Service <b>Required</b></span><select name="service"><option>Gel polish</option><option>Nail extensions</option><option>Custom nail art</option><option>Manicure</option></select></label>
+          <button class="gold-button" type="submit">⌕ &nbsp; Show nearby professionals</button>
           <label><span>Preferred date <small>Optional</small></span><input name="date" type="date" /><small>We’ll confirm the appointment time later</small></label>
-          <button class="gold-button" type="submit">⌕ &nbsp; Explore nearby</button>
         </form>
+        <p class="location-error" role="alert" hidden></p>
+        <p class="location-privacy">Location is used for this search and shared with Google Maps; it is not shown publicly. You can choose PIN-code search instead.</p>
         <a class="quote-button" data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Ask Sahaan for a quote →</a>
         <p class="request-note">No payment or booking yet. Public Google listings are not automatically Sahaan partners.</p>
         <div class="proof"><span>Hyderabad-first search</span><span>Google listings clearly labelled</span><span>Requests reviewed by Sahaan</span></div>
@@ -136,7 +147,7 @@
       <section class="visual"><div class="caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div class="status"><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></section>
       <section class="services" id="services"><button><span>01</span>Gel polish</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Manicure</button></section>
       <section class="price-guide"><p class="eyebrow">Personalised pricing</p><h2>A clear quote before you book.</h2><p>Tell us the treatment, design or add-ons you want and where you need the service. We’ll confirm availability and share your full price before you decide.</p><div class="price-grid"><article><strong>Gel polish</strong><b>Quote on request</b><small>Application, removal and nail care depend on the work required.</small></article><article><strong>Manicure</strong><b>Quote on request</b><small>The treatment, products and time are confirmed in your quote.</small></article><article><strong>Nail extensions</strong><b>Quote on request</b><small>Length, materials and design are considered.</small></article><article><strong>Custom nail art</strong><b>Quote on request</b><small>Share a design for a tailored quote.</small></article></div><p>Your final quote will show the service, travel, any additional charges and the total before payment or booking. A PIN code alone cannot confirm travel cost.</p></section>
-      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Choose a treatment and enter your PIN code. Add a preferred date if you have one.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
+      <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Choose a treatment and use your location, or search another area by PIN code. Add a preferred date if you have one.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
       <a class="brand-signature" href="/" aria-label="Sahaan Studios home"><span class="signature-art" aria-hidden="true"><i></i><i></i></span><span>Your expression. Our essence.</span></a>
     </main>
     <nav class="bottom-nav" aria-label="Customer shortcuts"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Explore</a><a data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer"><b>✧</b>Get quote</a></nav>
@@ -156,11 +167,25 @@
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
       document.addEventListener('pointerdown', (event) => { if (!event.target.closest('header')) closeMenu(); });
       const pin = form.elements.pin;
+      const manualPin = document.querySelector('.manual-pin');
+      const areaToggle = document.querySelector('#area-toggle');
+      const locationChoice = document.querySelector('.location-choice');
+      const locationError = document.querySelector('.location-error');
+      const submitButton = form.querySelector('[type="submit"]');
+      areaToggle.addEventListener('click', () => {
+        manualPin.hidden = !manualPin.hidden;
+        pin.required = !manualPin.hidden;
+        locationChoice.querySelector('strong').textContent = manualPin.hidden ? 'Find beauty near me' : 'Search a different area';
+        locationChoice.querySelector('small').textContent = manualPin.hidden ? 'Your browser will ask to use your location' : 'Enter a Hyderabad PIN code below';
+        areaToggle.textContent = manualPin.hidden ? 'Use PIN instead' : 'Use my location';
+        submitButton.textContent = manualPin.hidden ? '⌕  Show nearby professionals' : '⌕  Explore this area';
+        locationError.hidden = true;
+      });
       const date = form.elements.date;
       date.min = new Date().toISOString().split('T')[0];
       pin.addEventListener('input', () => { pin.value = pin.value.replace(/\D/g, '').slice(0, 6); });
       const updateQuoteLinks = () => {
-        const message = `Hi Sahaan! I’d like a quote for ${form.elements.service.value}.\nHyderabad PIN code: ${pin.value || '[please share your PIN code]'}\nPreferred date: ${date.value || '[please share a date if you have one]'}\nDesign or treatment details: [please describe or attach a photo]\nService address for travel: [please share privately here]\n\nPlease confirm the service, travel, any additional charges and final total before booking.`;
+        const message = `Hi Sahaan! I’d like a quote for ${form.elements.service.value}.\nMy Hyderabad area or PIN code: ${pin.value || '[please share your area]'}\nPreferred date: ${date.value || '[please share a date if you have one]'}\nDesign or treatment details: [please describe or attach a photo]\nService address for travel: [please share privately here]\n\nPlease confirm the service, travel, any additional charges and final total before booking.`;
         document.querySelectorAll('[data-quote-link]').forEach((link) => { link.href = `https://wa.me/918143072723?text=${encodeURIComponent(message)}`; });
       };
       form.addEventListener('input', updateQuoteLinks);
@@ -172,11 +197,29 @@
       updateQuoteLinks();
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const values = new FormData(form);
-        location.href = `/professionals?${new URLSearchParams(values).toString()}`;
+        if (!manualPin.hidden) {
+          if (!/^\d{6}$/.test(pin.value)) { locationError.textContent = 'Enter a six-digit Hyderabad PIN code.'; locationError.hidden = false; return; }
+          location.href = `/professionals?${new URLSearchParams(new FormData(form)).toString()}`;
+          return;
+        }
+        if (!navigator.geolocation) { locationError.textContent = 'Location is unavailable. Search by PIN code instead.'; locationError.hidden = false; return; }
+        submitButton.disabled = true;
+        submitButton.textContent = 'Finding your location…';
+        locationError.hidden = true;
+        navigator.geolocation.getCurrentPosition(({ coords }) => {
+          sessionStorage.setItem('sahaan-customer-location', JSON.stringify({ latitude:Number(coords.latitude.toFixed(3)), longitude:Number(coords.longitude.toFixed(3)), savedAt:Date.now() }));
+          location.href = `/professionals?${new URLSearchParams({ service:form.elements.service.value, near:'me', date:date.value })}`;
+        }, (error) => {
+          locationError.textContent = error.code === 1 ? 'Location access was declined. Search by PIN code instead.' : 'We could not detect your location. Try again or search by PIN code.';
+          locationError.hidden = false;
+          submitButton.disabled = false;
+          submitButton.textContent = '⌕  Show nearby professionals';
+        }, { enableHighAccuracy:false, timeout:12000, maximumAge:60000 });
       });
       document.querySelectorAll('.services button').forEach((button) => button.addEventListener('click', () => {
         form.elements.service.value = button.textContent.trim().replace(/^0[1-4]/, '').trim();
+        document.querySelectorAll('.mobile-services button').forEach((choice) => choice.setAttribute('aria-pressed', String(choice.textContent.trim() === form.elements.service.value)));
+        updateQuoteLinks();
         form.scrollIntoView({ behavior: 'smooth' });
       }));
     </script>
