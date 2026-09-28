@@ -91,8 +91,9 @@
       .mobile-services { margin:0; padding:0 0 12px; border:0; border-bottom:1px solid var(--line); }
       .mobile-services legend { padding-bottom:10px; font-size:13px; font-weight:800; }
       .mobile-services > div { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-      .mobile-services button { min-height:48px; display:grid; align-content:center; gap:3px; padding:7px 9px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-size:13px; font-weight:600; text-align:left; }
-      .mobile-services button small { color:var(--deep); font-size:11px; font-weight:800; line-height:1.2; }
+      .mobile-services button { min-height:90px; display:grid; align-content:start; gap:3px; padding:10px 9px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-size:13px; font-weight:600; text-align:left; }
+      .mobile-services button small { color:var(--deep); font-size:14px; font-weight:800; line-height:1.2; }
+      .mobile-services button .duration { color:var(--muted); font-size:12px; font-weight:600; }
       .mobile-services button[aria-pressed="true"] { border-color:var(--deep); background:var(--soft); color:var(--deep); }
       .legacy-service { display:none; }
       label { padding:11px 2px; }
@@ -123,6 +124,8 @@
       .location-error { margin:10px 0 0; color:#8b2e1f; font-size:12px; font-weight:700; }
       .legal-links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 18px; margin:4px 18px 24px; font-size:12px; }
       .legal-links a { color:var(--deep); text-decoration:underline; text-underline-offset:3px; }
+      .price-grid .duration { display:flex; align-items:center; gap:6px; color:var(--ink); font-size:13px; font-weight:700; }
+      .price-grid article a { margin-top:5px; color:var(--deep); font-size:13px; font-weight:800; text-decoration:underline; text-underline-offset:3px; }
     </style>
   </head>
   <body>
@@ -134,7 +137,7 @@
         <h1>Beautiful nails,<br /><em>closer to home.</em></h1>
         <p class="intro">Choose a service. We’ll show nearby options using your location, with your permission.</p>
         <form id="find">
-          <fieldset class="mobile-services"><legend>What would you like done?</legend><div><button type="button" data-service="Gel polish" aria-pressed="true"><span>Gel polish</span><small>₹499–₹699</small></button><button type="button" data-service="Nail extensions" aria-pressed="false"><span>Nail extensions</span><small>₹1,399–₹2,499</small></button><button type="button" data-service="Custom nail art" aria-pressed="false"><span>Custom nail art</span><small>₹75–₹250 / nail</small></button><button type="button" data-service="Manicure" aria-pressed="false"><span>Manicure</span><small>₹699–₹1,199</small></button></div></fieldset>
+          <fieldset class="mobile-services"><legend>What would you like done?</legend><div><button type="button" data-service="Gel polish" aria-pressed="true"><span>Gel polish</span><small>₹499–₹699</small><small class="duration">45–75 min typical</small></button><button type="button" data-service="Nail extensions" aria-pressed="false"><span>Nail extensions</span><small>₹1,399–₹2,499</small><small class="duration">2–3 hr 15 min typical</small></button><button type="button" data-service="Custom nail art" aria-pressed="false"><span>Custom nail art</span><small>₹75–₹250 / nail</small><small class="duration">15–30 min / nail typical</small></button><button type="button" data-service="Manicure" aria-pressed="false"><span>Manicure</span><small>₹699–₹1,199</small><small class="duration">45–75 min typical</small></button></div></fieldset>
           <div class="location-choice"><div><strong>Find beauty near me</strong><small>Your browser will ask to use your location</small></div><button type="button" id="area-toggle">Use PIN instead</button></div>
           <label class="manual-pin" hidden><span>Hyderabad PIN code <b>Required</b></span><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="e.g. 500034" /><small>Any six-digit Hyderabad PIN code</small></label>
           <label class="legacy-service"><span>Service <b>Required</b></span><select name="service"><option>Gel polish</option><option>Nail extensions</option><option>Custom nail art</option><option>Manicure</option></select></label>
@@ -143,18 +146,18 @@
         </form>
         <p class="location-error" role="alert" hidden></p>
         <p class="location-privacy">Location is used for this search and shared with Google Maps; it is not shown publicly. You can choose PIN-code search instead.</p>
-        <a class="quote-button" data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Ask Sahaan for a quote →</a>
-        <p class="request-note">No payment or booking yet. Public Google listings are not automatically Sahaan partners.</p>
+        <a class="quote-button" data-request-link href="/request">Request a preferred time →</a>
+        <p class="request-note">See price and time guides below. Sahaan checks the artist and final total before confirming; no payment now.</p>
         <div class="proof"><span>Hyderabad-first search</span><span>Google listings clearly labelled</span><span>Requests reviewed by Sahaan</span></div>
       </section>
       <section class="visual"><div class="caption"><span>THE SAHAAN STANDARD</span><strong>Discover locally.<br />Verify carefully.</strong></div><div class="status"><strong>Hyderabad launch</strong><small>PIN-code discovery across the city</small></div></section>
       <section class="services" id="services"><button><span>01</span>Gel polish</button><button><span>02</span>Nail extensions</button><button><span>03</span>Custom nail art</button><button><span>04</span>Manicure</button></section>
-      <section class="price-guide"><p class="eyebrow">Hyderabad price guide</p><h2>Know the range before you enquire.</h2><p>Indicative market ranges for planning, not fixed Sahaan booking prices. Your artist’s work, design and travel determine the confirmed total.</p><div class="price-grid"><article><strong>Gel polish</strong><b>₹499–₹699</b><small>Solid-colour polish on natural nails. Existing gel removal may be extra.</small></article><article><strong>Manicure</strong><b>₹699–₹1,199</b><small>Essential to extended care; gel polish is separate unless included in your quote.</small></article><article><strong>Nail extensions</strong><b>₹1,399–₹2,499</b><small>Typical full-hand range. Material, length, removal and art affect the price.</small></article><article><strong>Custom nail art</strong><b>₹75–₹250 / nail</b><small>Detailed, 3D or bridal designs need an artist-specific estimate.</small></article></div><p>Indicative Hyderabad service ranges, checked September 2026. Travel, removal, add-ons and applicable taxes may change the total. Sahaan confirms the complete price before payment or booking.</p></section>
+      <section class="price-guide"><p class="eyebrow">Hyderabad price &amp; time guide</p><h2>Know the range before you enquire.</h2><p>Local market price guides and typical work time; Sahaan confirms your artist and exact total before booking.</p><div class="price-grid"><article><strong>Gel polish</strong><b>₹499–₹699</b><span class="duration">◷ 45–75 min typical work time</span><small>Solid colour on natural nails. Existing gel removal may be extra.</small><a href="/request?service=Gel+polish">Request gel polish →</a></article><article><strong>Manicure</strong><b>₹699–₹1,199</b><span class="duration">◷ 45–75 min typical work time</span><small>Essential to extended care; gel polish is separate unless quoted.</small><a href="/request?service=Manicure">Request manicure →</a></article><article><strong>Nail extensions</strong><b>₹1,399–₹2,499</b><span class="duration">◷ 2–3 hr 15 min typical work time</span><small>Full-hand set. Material, length, removal and art affect the price.</small><a href="/request?service=Nail+extensions">Request extensions →</a></article><article><strong>Custom nail art</strong><b>₹75–₹250 / nail</b><span class="duration">◷ 15–30 min per nail typical work time</span><small>Detailed, 3D or bridal designs need an artist-specific estimate.</small><a href="/request?service=Custom+nail+art">Request nail art →</a></article></div><p>Indicative Hyderabad ranges benchmarked against published local menus including Urban Company. Times are Sahaan planning estimates, not promised slots. Travel, removal, add-ons and taxes may change the total.</p></section>
       <section class="journey" id="how"><p class="eyebrow">A focused customer experience</p><h2>Tell us what you need.<br />See relevant professionals.</h2><div class="steps"><article><span>01</span><b>Share your request</b><p>Choose a treatment and use your location, or search another area by PIN code. Add a preferred date if you have one.</p></article><article><span>02</span><b>Explore local listings</b><p>Compare Google-listed businesses by ratings and reviews. A listing is not a Sahaan partner.</p></article><article><span>03</span><b>Ask Sahaan to match you</b><p>We check artist availability and share the exact scope and price before you decide.</p></article></div></section>
       <a class="brand-signature" href="/" aria-label="Sahaan Studios home"><span class="signature-art" aria-hidden="true"><i></i><i></i></span><span>Your expression. Our essence.</span></a>
       <nav class="legal-links" aria-label="Policies"><a href="/cancellation-refunds">Cancellation &amp; refunds</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
     </main>
-    <nav class="bottom-nav" aria-label="Customer shortcuts"><a href="/"><b>⌂</b>Home</a><a href="#find"><b>⌕</b>Explore</a><a data-quote-link href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer"><b>✧</b>Get quote</a></nav>
+    <nav class="bottom-nav" aria-label="Customer shortcuts"><a href="/"><b>⌂</b>Home</a><a href="#services"><b>⌕</b>Services</a><a data-request-link href="/request"><b>✧</b>Request</a></nav>
     <script>
       const form = document.querySelector('#find');
       const menuButton = document.querySelector('.menu-toggle');
@@ -189,8 +192,9 @@
       date.min = new Date().toISOString().split('T')[0];
       pin.addEventListener('input', () => { pin.value = pin.value.replace(/\D/g, '').slice(0, 6); });
       const updateQuoteLinks = () => {
-        const message = `Hi Sahaan! I’d like a quote for ${form.elements.service.value}.\nMy Hyderabad area or PIN code: ${pin.value || '[please share your area]'}\nPreferred date: ${date.value || '[please share a date if you have one]'}\nDesign or treatment details: [please describe or attach a photo]\nService address for travel: [please share privately here]\n\nPlease confirm the service, travel, any additional charges and final total before booking.`;
-        document.querySelectorAll('[data-quote-link]').forEach((link) => { link.href = `https://wa.me/918143072723?text=${encodeURIComponent(message)}`; });
+        const params = new URLSearchParams({ service:form.elements.service.value });
+        if (date.value) params.set('date', date.value);
+        document.querySelectorAll('[data-request-link]').forEach((link) => { link.href = `/request?${params}`; });
       };
       form.addEventListener('input', updateQuoteLinks);
       document.querySelectorAll('.mobile-services button').forEach((button) => button.addEventListener('click', () => {

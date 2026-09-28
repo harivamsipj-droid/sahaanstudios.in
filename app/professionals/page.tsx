@@ -1,14 +1,14 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BadgeCheck, Building2, Check, ExternalLink, Home, MapPin, MessageCircle, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BadgeCheck, Building2, CalendarDays, Check, ExternalLink, Home, MapPin, MessageCircle, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { GooglePlaceResult, GooglePlaceSearchResponse } from '@/lib/google-place-types';
 import { SAHAAN_WHATSAPP_DISPLAY, sahaanWhatsAppUrl } from '@/lib/contact';
 import { getCustomerPosition, readCustomerLocation, type CustomerLocation } from '@/lib/customer-location';
 
-const serviceOptions = ['Gel polish', 'Nail extensions', 'Custom nail art', 'Manicure', 'Beauty salon'];
+const serviceOptions = ['Gel polish', 'Nail extensions', 'Custom nail art', 'Manicure'];
 
 async function loadGooglePlaces(pinCode: string, service: string) {
   const response = await fetch(`/api/google-professionals?pin=${encodeURIComponent(pinCode)}&service=${encodeURIComponent(service)}`, { cache: 'no-store' });
@@ -122,7 +122,7 @@ export default function ProfessionalsPage() {
     window.open(sahaanWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
   }
 
-  const matchMessage = `Hi Sahaan! Please help me find a nail artist for ${service}.\nHyderabad area or PIN code: ${pinCode || '[please share your area]'}\nPreferred date: ${requestedDate || '[please share your preferred date]'}\nTreatment details or reference photo: [please describe or attach]\nExact service address for travel quote: [please share privately here]\n\nPlease send my service price, travel charge, any additional charges and final total before I decide. I understand this message is a request, not a confirmed appointment.`;
+  const requestUrl = `/request?${new URLSearchParams({ service, ...(requestedDate ? { date: requestedDate } : {}) })}`;
 
   return <main className="directory-page hyderabad-directory">
     <header className="market-header inner-header"><a className="market-brand" href="/"><span className="market-monogram">S</span><span><strong>SAHAAN</strong><small>HYDERABAD LAUNCH</small></span></a><nav className="desktop-nav"><a href="/">Customer home</a><a className="active-link" href="/professionals">Nearby professionals</a><a href="/partners">Professional onboarding</a></nav><Button className="header-button" render={<a href="/partners" />}>Join Sahaan <ArrowRight /></Button></header>
@@ -134,7 +134,7 @@ export default function ProfessionalsPage() {
         <label><span>Service required</span><div><Sparkles /><select value={service} onChange={(event) => setService(event.target.value)}>{serviceOptions.map((item) => <option key={item}>{item}</option>)}</select></div></label><Button type="submit" disabled={loading || locating}><Search /> {loading ? 'Searching…' : manualArea ? 'Search this area' : 'Refresh nearby results'}</Button>
       </form>
       <p className="directory-location-note">{manualArea ? 'PIN-code search does not use your device location. Share an exact address privately only when requesting a travel quote.' : 'Your approximate location is used for this search and shared with Google Maps. It is not shown publicly; choose PIN-code search at any time.'}</p>
-      <div className="manual-match-panel"><div><strong>Want Sahaan to find an artist?</strong><p>Share your treatment and address privately. We’ll confirm a reviewed artist, service price, travel and total.</p><small>No booking or payment until you approve the final quote.</small></div><a href={sahaanWhatsAppUrl(matchMessage)} target="_blank" rel="noopener noreferrer"><MessageCircle /> Request a quote</a></div>
+      <div className="manual-match-panel"><div><strong>Want Sahaan to find an artist?</strong><p>Choose a preferred time and send Sahaan your request. We’ll confirm a reviewed artist, service price, travel and total.</p><small>No booking or payment until you approve the final quote.</small></div><a href={requestUrl}><CalendarDays /> Request a preferred time</a></div>
       <a className="whatsapp-inline-link" href={sahaanWhatsAppUrl('Hi Sahaan! I have a question about finding a beauty professional in Hyderabad.')} target="_blank" rel="noopener noreferrer"><MessageCircle /> Questions? WhatsApp {SAHAAN_WHATSAPP_DISPLAY}</a>
       {requestedDate && <div className="requested-date"><Check /> Preferred appointment date: <b>{new Date(`${requestedDate}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</b></div>}
     </section>
@@ -163,6 +163,6 @@ export default function ProfessionalsPage() {
     </section>
 
     <section className="directory-trust"><div><MapPin /><strong>Local discovery</strong><p>Search around your permitted location, or choose another Hyderabad area by PIN code.</p></div><div><Star /><strong>Rating filters</strong><p>Compare average rating and the number of Google Maps reviews together.</p></div><div><BadgeCheck /><strong>Verification stays separate</strong><p>Only professionals who complete Sahaan checks receive the verified badge.</p></div></section>
-    <div className="mobile-nav" aria-label="Customer shortcuts"><a href="/"><Home /><span>Home</span></a><a className="current" href="#results"><Search /><span>Results</span></a><a href={sahaanWhatsAppUrl(matchMessage)} target="_blank" rel="noopener noreferrer"><MessageCircle /><span>Get quote</span></a></div>
+    <div className="mobile-nav" aria-label="Customer shortcuts"><a href="/"><Home /><span>Home</span></a><a className="current" href="#results"><Search /><span>Results</span></a><a href={requestUrl}><CalendarDays /><span>Request</span></a></div>
   </main>;
 }

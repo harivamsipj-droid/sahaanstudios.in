@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import worker from './dist/server/index.js';
 import { drainBookingNotifications, handleManagedBooking } from './server/managed-bookings.mjs';
+import { handleCustomerRequest } from './server/customer-requests.mjs';
 
 const root = resolve(fileURLToPath(new URL('./dist/client/', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
@@ -81,11 +82,14 @@ const server = createServer(async (incoming, outgoing) => {
     const bookingResponse = url.pathname.startsWith('/api/managed-bookings/')
       ? await handleManagedBooking(request)
       : null;
-    const staticResponse = !bookingResponse && (method === 'GET' || method === 'HEAD')
+    const requestResponse = url.pathname.startsWith('/api/customer-requests/')
+      ? await handleCustomerRequest(request)
+      : null;
+    const staticResponse = !bookingResponse && !requestResponse && (method === 'GET' || method === 'HEAD')
       ? await assets.fetch(request)
       : null;
 
-    const response = bookingResponse || (staticResponse && staticResponse.status !== 404
+    const response = bookingResponse || requestResponse || (staticResponse && staticResponse.status !== 404
       ? staticResponse
       : await worker.fetch(
           request,

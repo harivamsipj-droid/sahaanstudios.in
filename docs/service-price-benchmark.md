@@ -10,3 +10,7 @@ These are indicative Hyderabad market references, **not** confirmed Sahaan artis
 | Custom nail art | ₹75–₹250 per nail | [Simore](https://simorenailtonique.in/services) lists basic at ₹75 and premium at ₹250 per finger. Complex 3D or bridal work requires an individual estimate. |
 
 Prices may change and service inclusions differ. The website avoids showing the platform’s internal commission calculation to customers; it shows only this planning guide and promises a complete final quote before they decide.
+
+## Mobile duration guide
+
+The website also shows **Sahaan planning estimates**, not guaranteed appointment lengths: gel polish 45–75 minutes, manicure 45–75 minutes, a full-hand extension set 2–3 hours 15 minutes, and nail art 15–30 minutes per nail. The artist must confirm the actual work time and available time window before a booking is confirmed. These are not copied Urban Company durations. For context, [Urban Company's Hyderabad nail menu](https://www.urbancompany.com/hyderabad-salon-nails) lists an advanced manicure at 1 hour 15 minutes, a gel polish plus removal package at 1 hour 30 minutes, and an extension plus removal package at 3 hours 15 minutes. Package durations include different work from Sahaan's basic services, so they are comparison points only.

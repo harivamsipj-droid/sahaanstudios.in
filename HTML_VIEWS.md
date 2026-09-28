@@ -21,7 +21,7 @@ The live homepage is the responsive React application in `app/page.tsx`, with sh
 2. Change mobile-only layout or copy in `public/mobile/mobile.html`.
 3. Change the main responsive production experience in `app/page.tsx` and `app/globals.css`.
 4. Never edit the generated `dist` folder. It is recreated during deployment.
-5. Keep search field names (`pin`, `service`, and `date`) unchanged so both files continue to open the professional results page correctly.
+5. Keep search field names (`pin`, `service`, and `date`) unchanged so both files continue to open the professional results page correctly. The `/request` page is the shared live customer enquiry form for both views.
 6. When the temporary WhatsApp number changes, update the links in both HTML files and the live React number in `lib/contact.ts`.
 7. When the launch service menu, indicative price guides or Hyderabad coverage messaging change, update both standalone HTML views and the responsive pages in `app/`; do not assume one updates the others automatically.
 

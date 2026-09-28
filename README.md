@@ -7,7 +7,7 @@ Hyderabad-first beauty marketplace connecting customers with independent nail an
 - Customers choose a service and find nearby Google listings using browser-permitted approximate location; Hyderabad PIN-code search remains a fallback. Preferred date is optional.
 - Professionals apply through a separate onboarding experience.
 - Google-listed businesses remain clearly separate from Sahaan-verified professionals.
-- Customers can send a manual Sahaan match request through WhatsApp; it is not a confirmed appointment.
+- Customers can see indicative price and work-time guides, choose a preferred window and submit a website enquiry. A website reference is issued only when private request storage is configured; otherwise the form offers an honest WhatsApp-only fallback. Opening WhatsApp is not the same as sending a message or confirming an appointment.
 - A private, feature-gated managed-payment flow is prepared. Sahaan issues an exact quote, the customer pays through Razorpay on the website, and Sahaan assigns and notifies the professional after verified payment. **It is disabled until the launch checklist is complete.**
 
 ## Local development
@@ -26,6 +26,8 @@ GOOGLE_PLACES_API_KEY=
 ```
 
 For managed payments, see [the payment launch checklist](docs/payment-launch.md) and `.env.example`. Never commit payment or WhatsApp credentials. Payments remain unavailable unless all private settings and both launch switches are present.
+
+For the website enquiry inbox, see [the customer request launch gate](docs/customer-request-launch.md). On Hostinger it needs a private MySQL database and admin token before it can save requests.
 
 Run the payment-flow smoke test with `npm test`. It uses fake Razorpay and WhatsApp responses and does not charge or contact anyone.
 
