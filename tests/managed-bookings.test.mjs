@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 const databaseFile = join(tmpdir(), `sahaan-payment-test-${randomUUID()}.sqlite`);
+process.env.NODE_ENV = 'test';
 Object.assign(process.env, {
   SAHAAN_PAYMENTS_ENABLED: '1', SAHAAN_POLICY_APPROVED: '1',
   SAHAAN_DATA_FILE: databaseFile, SAHAAN_ADMIN_TOKEN: 'test_admin_token_longer_than_32_characters',
@@ -16,7 +17,8 @@ Object.assign(process.env, {
   META_TEMPLATE_CUSTOMER_ASSIGNED: 'customer_test', META_TEMPLATE_ARTIST_ASSIGNED: 'artist_test',
 });
 
-const { handleManagedBooking, closeManagedBookingStorage } = await import('../server/managed-bookings.mjs');
+const { handleManagedBooking, closeManagedBookingStorage, enableSqliteBookingStorageForTests } = await import('../server/managed-bookings.mjs');
+enableSqliteBookingStorageForTests();
 const originalFetch = globalThis.fetch;
 const messages = [];
 let issuedOrder = '';

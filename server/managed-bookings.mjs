@@ -3,10 +3,22 @@ import { isAbsolute } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 let database;
+let mysqlPool;
+let mysqlReady;
+let sqliteForTests = false;
+
+export function enableSqliteBookingStorageForTests() {
+  if (process.env.NODE_ENV !== 'test') throw new Error('SQLite live-flow testing is only available in test runs');
+  sqliteForTests = true;
+}
 
 export function closeManagedBookingStorage() {
   database?.close();
   database = undefined;
+  const pool = mysqlPool;
+  mysqlPool = undefined;
+  mysqlReady = undefined;
+  return pool?.end();
 }
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), {
@@ -23,18 +35,75 @@ function configured() {
     && Boolean(process.env.META_TEMPLATE_PAYMENT && process.env.META_TEMPLATE_CUSTOMER_ASSIGNED && process.env.META_TEMPLATE_ARTIST_ASSIGNED);
   return process.env.SAHAAN_PAYMENTS_ENABLED === '1'
     && process.env.SAHAAN_POLICY_APPROVED === '1'
-    && Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
+    && (testMode || sqliteForTests ? Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
+      : hasMysqlConfig())
     && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32)
     && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET)
     && (testMode || liveMode);
+}
+
+function hasMysqlConfig() {
+  return ['SAHAAN_MYSQL_HOST', 'SAHAAN_MYSQL_USER', 'SAHAAN_MYSQL_PASSWORD', 'SAHAAN_MYSQL_DATABASE']
+    .every((name) => Boolean(process.env[name]));
 }
 
 function testMode() {
   return process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
 }
 
-function db() {
+async function db() {
   if (!configured()) throw new Error('Managed bookings are not configured');
+  if (!testMode() && !sqliteForTests) {
+    if (!mysqlReady) {
+      mysqlReady = (async () => {
+        const { createPool } = await import('mysql2/promise');
+        mysqlPool = createPool({
+          host: process.env.SAHAAN_MYSQL_HOST,
+          user: process.env.SAHAAN_MYSQL_USER,
+          password: process.env.SAHAAN_MYSQL_PASSWORD,
+          database: process.env.SAHAAN_MYSQL_DATABASE,
+          timezone: 'Z', waitForConnections: true, connectionLimit: 4,
+        });
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS managed_quotes (
+          id CHAR(36) PRIMARY KEY, token CHAR(64) NOT NULL UNIQUE,
+          customer_name VARCHAR(100) NOT NULL, customer_phone VARCHAR(16) NOT NULL,
+          service VARCHAR(100) NOT NULL, scope TEXT NOT NULL,
+          service_address VARCHAR(500) NOT NULL, appointment_window VARCHAR(100) NOT NULL,
+          service_paise INT NOT NULL, travel_paise INT NOT NULL, extras_paise INT NOT NULL,
+          tax_paise INT NOT NULL, total_paise INT NOT NULL, status VARCHAR(24) NOT NULL,
+          razorpay_order_id VARCHAR(80) UNIQUE, razorpay_payment_id VARCHAR(80) UNIQUE,
+          artist_name VARCHAR(100), artist_phone VARCHAR(16), artist_consent_at VARCHAR(35),
+          created_at VARCHAR(35) NOT NULL, expires_at VARCHAR(35) NOT NULL,
+          coverage_confirmed_at VARCHAR(35), customer_consent_at VARCHAR(35),
+          paid_at VARCHAR(35), assigned_at VARCHAR(35), refunded_at VARCHAR(35),
+          INDEX managed_quotes_created (created_at), INDEX managed_quotes_status (status)
+        ) ENGINE=InnoDB`);
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS managed_notification_outbox (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, quote_id CHAR(36) NOT NULL,
+          kind VARCHAR(32) NOT NULL, state VARCHAR(20) NOT NULL DEFAULT 'pending',
+          attempts INT NOT NULL DEFAULT 0, last_error VARCHAR(200),
+          created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          UNIQUE KEY managed_outbox_unique (quote_id,kind),
+          INDEX managed_outbox_state (state,id),
+          CONSTRAINT managed_outbox_quote FOREIGN KEY (quote_id) REFERENCES managed_quotes(id)
+        ) ENGINE=InnoDB`);
+        await mysqlPool.query("UPDATE managed_notification_outbox SET state='needs_review',last_error='Server restarted during send; verify delivery manually' WHERE state='sending'");
+        return {
+          prepare(sql) {
+            const query = sql.replace(/\bquotes\b/g, 'managed_quotes')
+              .replace(/\bnotification_outbox\b/g, 'managed_notification_outbox')
+              .replace(/INSERT OR IGNORE/gi, 'INSERT IGNORE');
+            return {
+              async get(...values) { const [rows] = await mysqlPool.execute(query, values); return rows[0]; },
+              async all(...values) { const [rows] = await mysqlPool.execute(query, values); return rows; },
+              async run(...values) { const [result] = await mysqlPool.execute(query, values); return { changes: result.affectedRows }; },
+            };
+          },
+        };
+      })().catch((error) => { mysqlReady = undefined; throw error; });
+    }
+    return mysqlReady;
+  }
   if (!database) {
     database = new DatabaseSync(process.env.SAHAAN_DATA_FILE);
     database.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -117,14 +186,14 @@ async function razorpay(path, options = {}) {
   return result;
 }
 
-function markPaid(row, paymentId) {
-  const store = db();
-  store.prepare(`UPDATE quotes SET status='paid_unassigned', razorpay_payment_id=?, paid_at=?
+async function markPaid(row, paymentId) {
+  const store = await db();
+  await store.prepare(`UPDATE quotes SET status='paid_unassigned', razorpay_payment_id=?, paid_at=?
     WHERE id=? AND status IN ('quoted','payment_pending') AND (razorpay_payment_id IS NULL OR razorpay_payment_id=?)`)
     .run(paymentId, new Date().toISOString(), row.id, paymentId);
-  const updated = store.prepare('SELECT * FROM quotes WHERE id=?').get(row.id);
+  const updated = await store.prepare('SELECT * FROM quotes WHERE id=?').get(row.id);
   if (!testMode() && updated?.razorpay_payment_id === paymentId) {
-    store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'payment_customer')`).run(row.id);
+    await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'payment_customer')`).run(row.id);
   }
   return updated;
 }
@@ -140,15 +209,22 @@ async function sendTemplate(to, name, parameters) {
     signal: AbortSignal.timeout(12_000),
   });
   if (!response.ok) throw new Error(`WhatsApp API returned ${response.status}`);
+  const result = await response.json();
+  if (typeof result.messages?.[0]?.id !== 'string') throw new Error('WhatsApp API response lacked a message ID');
 }
 
 export async function drainBookingNotifications() {
   if (!configured() || testMode()) return;
-  const store = db();
-  const pending = store.prepare(`SELECT o.id AS notification_id, o.kind, q.* FROM notification_outbox o
+  const store = await db();
+  // Recover an acknowledgement if the process stopped between recording a
+  // captured payment and queueing its customer message.
+  await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind)
+    SELECT id,'payment_customer' FROM quotes
+    WHERE status IN ('paid_unassigned','assigned') AND razorpay_payment_id IS NOT NULL`).run();
+  const pending = await store.prepare(`SELECT o.id AS notification_id, o.kind, q.* FROM notification_outbox o
     JOIN quotes q ON q.id=o.quote_id WHERE o.state='pending' AND o.attempts<10 ORDER BY o.id LIMIT 10`).all();
   for (const item of pending) {
-    const claimed = store.prepare(`UPDATE notification_outbox SET state='sending',attempts=attempts+1 WHERE id=? AND state='pending'`).run(item.notification_id);
+    const claimed = await store.prepare(`UPDATE notification_outbox SET state='sending',attempts=attempts+1 WHERE id=? AND state='pending'`).run(item.notification_id);
     if (!claimed.changes) continue;
     try {
       const reference = item.id.slice(0, 8).toUpperCase();
@@ -162,9 +238,9 @@ export async function drainBookingNotifications() {
         await sendTemplate(item.artist_phone, process.env.META_TEMPLATE_ARTIST_ASSIGNED,
           [item.artist_name, reference, item.service, item.appointment_window, item.service_address, item.customer_phone]);
       }
-      store.prepare(`UPDATE notification_outbox SET state='submitted',last_error=NULL WHERE id=?`).run(item.notification_id);
+      await store.prepare(`UPDATE notification_outbox SET state='submitted',last_error=NULL WHERE id=?`).run(item.notification_id);
     } catch (error) {
-      store.prepare(`UPDATE notification_outbox SET state='pending',last_error=? WHERE id=?`)
+      await store.prepare(`UPDATE notification_outbox SET state='needs_review',last_error=? WHERE id=?`)
         .run(String(error).slice(0, 200), item.notification_id);
     }
   }
@@ -175,15 +251,15 @@ export async function handleManagedBooking(request) {
   const path = url.pathname.replace('/api/managed-bookings', '');
   if (path === '/health' && request.method === 'GET') {
     if (!configured()) return json({ enabled: false, testMode: false });
-    try { db(); return json({ enabled: true, testMode: testMode() }); }
+    try { await db(); return json({ enabled: true, testMode: testMode() }); }
     catch { return json({ enabled: false, testMode: testMode() }, 503); }
   }
   if (!configured()) return json({ error: 'Online booking payments are not available yet.' }, 503);
   if (request.method !== 'GET' && !sameOrigin(request) && path !== '/webhook') return json({ error: 'Origin not allowed' }, 403);
   try {
-    const store = db();
+    const store = await db();
     if (path === '/quote' && request.method === 'GET') {
-      const row = store.prepare('SELECT * FROM quotes WHERE token=?').get(url.searchParams.get('token'));
+      const row = await store.prepare('SELECT * FROM quotes WHERE token=?').get(url.searchParams.get('token'));
       return row ? json(publicQuote(row)) : json({ error: 'Quote not found' }, 404);
     }
     if (path === '/admin/quotes' && request.method === 'POST') {
@@ -208,7 +284,7 @@ export async function handleManagedBooking(request) {
       const total = row.servicePaise + row.travelPaise + row.extrasPaise + row.taxPaise;
       if (total < 100 || total > 2_000_000) return json({ error: 'Invalid total' }, 400);
       const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-      store.prepare(`INSERT INTO quotes(id,token,customer_name,customer_phone,service,scope,service_address,appointment_window,
+      await store.prepare(`INSERT INTO quotes(id,token,customer_name,customer_phone,service,scope,service_address,appointment_window,
         service_paise,travel_paise,extras_paise,tax_paise,total_paise,status,created_at,expires_at,coverage_confirmed_at)
         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'quoted',?,?,?)`).run(
         row.id,row.token,row.customerName,row.customerPhone,row.service,row.scope,row.serviceAddress,row.appointmentWindow,
@@ -217,30 +293,30 @@ export async function handleManagedBooking(request) {
     }
     if (path === '/admin/quotes' && request.method === 'GET') {
       if (!adminAllowed(request)) return json({ error: 'Unauthorized' }, 401);
-      const rows = store.prepare(`SELECT id,customer_name,service,appointment_window,total_paise,status,paid_at,artist_name FROM quotes ORDER BY created_at DESC LIMIT 100`).all();
-      const notifications = store.prepare(`SELECT quote_id,kind,state,attempts,last_error FROM notification_outbox ORDER BY id DESC LIMIT 300`).all();
+      const rows = await store.prepare(`SELECT id,customer_name,service,appointment_window,total_paise,status,paid_at,artist_name FROM quotes ORDER BY created_at DESC LIMIT 100`).all();
+      const notifications = await store.prepare(`SELECT quote_id,kind,state,attempts,last_error FROM notification_outbox ORDER BY id DESC LIMIT 300`).all();
       return json({ quotes: rows, notifications });
     }
     if (path === '/order' && request.method === 'POST') {
       const input = await body(request);
       if (input.consent !== true) return json({ error: testMode() ? 'Please approve this simulated test transaction.' : 'Please approve the quote and WhatsApp booking updates.' }, 400);
-      const row = store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
+      const row = await store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
       if (!row) return json({ error: 'Quote not found' }, 404);
       if (new Date(row.expires_at) < new Date()) return json({ error: 'This quote has expired; ask Sahaan for a new quote.' }, 409);
       if (!['quoted','payment_pending'].includes(row.status)) return json({ error: 'This quote is not payable' }, 409);
-      store.prepare('UPDATE quotes SET customer_consent_at=COALESCE(customer_consent_at,?) WHERE id=?')
+      await store.prepare('UPDATE quotes SET customer_consent_at=COALESCE(customer_consent_at,?) WHERE id=?')
         .run(new Date().toISOString(), row.id);
       let orderId = row.razorpay_order_id;
       if (!orderId) {
         const order = await razorpay('orders', { method: 'POST', body: JSON.stringify({ amount: row.total_paise, currency: 'INR', receipt: row.id, notes: { sahaan_quote: row.id } }) });
-        store.prepare(`UPDATE quotes SET razorpay_order_id=?,status='payment_pending' WHERE id=? AND razorpay_order_id IS NULL`).run(order.id, row.id);
-        orderId = store.prepare('SELECT razorpay_order_id FROM quotes WHERE id=?').get(row.id).razorpay_order_id;
+        await store.prepare(`UPDATE quotes SET razorpay_order_id=?,status='payment_pending' WHERE id=? AND razorpay_order_id IS NULL`).run(order.id, row.id);
+        orderId = (await store.prepare('SELECT razorpay_order_id FROM quotes WHERE id=?').get(row.id)).razorpay_order_id;
       }
       return json({ keyId: process.env.RAZORPAY_KEY_ID, orderId, amount: row.total_paise, currency: 'INR' });
     }
     if (path === '/verify' && request.method === 'POST') {
       const input = await body(request);
-      const row = store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
+      const row = await store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
       if (!row || row.razorpay_order_id !== input.orderId || !/^pay_[A-Za-z0-9]+$/.test(input.paymentId || '')) return json({ error: 'Payment details do not match the quote' }, 400);
       const expected = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(`${row.razorpay_order_id}|${input.paymentId}`).digest('hex');
       if (!safeEqual(expected, input.signature)) return json({ error: 'Payment signature invalid' }, 400);
@@ -248,7 +324,7 @@ export async function handleManagedBooking(request) {
       if (payment.status !== 'captured' || payment.order_id !== row.razorpay_order_id || payment.amount !== row.total_paise || payment.currency !== 'INR') {
         return json({ error: 'Payment capture is pending. Please check again shortly; do not pay twice.' }, 202);
       }
-      const updated = markPaid(row, input.paymentId);
+      const updated = await markPaid(row, input.paymentId);
       await drainBookingNotifications();
       return json({ status: updated.status, reference: row.id });
     }
@@ -259,13 +335,13 @@ export async function handleManagedBooking(request) {
       const event = JSON.parse(raw);
       if (event.event === 'payment.captured') {
         const payment = event.payload?.payment?.entity;
-        const row = store.prepare('SELECT * FROM quotes WHERE razorpay_order_id=?').get(payment?.order_id);
-        if (row && payment?.status === 'captured' && payment.amount === row.total_paise && payment.currency === 'INR') markPaid(row, payment.id);
+        const row = await store.prepare('SELECT * FROM quotes WHERE razorpay_order_id=?').get(payment?.order_id);
+        if (row && payment?.status === 'captured' && payment.amount === row.total_paise && payment.currency === 'INR') await markPaid(row, payment.id);
       } else if (event.event === 'refund.processed') {
         const refund = event.payload?.refund?.entity;
-        const row = store.prepare('SELECT * FROM quotes WHERE razorpay_payment_id=?').get(refund?.payment_id);
+        const row = await store.prepare('SELECT * FROM quotes WHERE razorpay_payment_id=?').get(refund?.payment_id);
         if (row && refund?.status === 'processed' && refund.amount === row.total_paise) {
-          store.prepare(`UPDATE quotes SET status='refunded',refunded_at=? WHERE id=? AND status IN ('paid_unassigned','assigned')`)
+          await store.prepare(`UPDATE quotes SET status='refunded',refunded_at=? WHERE id=? AND status IN ('paid_unassigned','assigned')`)
             .run(new Date().toISOString(), row.id);
         }
       }
@@ -283,12 +359,12 @@ export async function handleManagedBooking(request) {
         return json({ error: 'Test mode accepts only a TEST artist and the synthetic 919999999998 number.' }, 400);
       }
       const now = new Date().toISOString();
-      const updated = store.prepare(`UPDATE quotes SET status='assigned',artist_name=?,artist_phone=?,artist_consent_at=?,assigned_at=? WHERE id=? AND status='paid_unassigned'`)
+      const updated = await store.prepare(`UPDATE quotes SET status='assigned',artist_name=?,artist_phone=?,artist_consent_at=?,assigned_at=? WHERE id=? AND status='paid_unassigned'`)
         .run(artistName,artistPhone,now,now,input.reference);
       if (!updated.changes) return json({ error: 'Only a paid, unassigned request can be assigned' }, 409);
       if (!testMode()) {
-        store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
-        store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
+        await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
+        await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
       }
       await drainBookingNotifications();
       return json({ status: 'assigned' });
