@@ -8,7 +8,7 @@ import test from 'node:test';
 const file = join(tmpdir(), `sahaan-customer-request-${randomUUID()}.sqlite`);
 process.env.SAHAAN_INQUIRY_DATA_FILE = file;
 process.env.SAHAAN_ADMIN_TOKEN = 'test-admin-token-with-at-least-32-characters';
-const { handleCustomerRequest, closeCustomerRequestStorage } = await import('../server/customer-requests.mjs');
+const { handleCustomerRequest, closeCustomerRequestStorage, drainCustomerRequestNotifications } = await import('../server/customer-requests.mjs');
 const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const details = { name: 'Test Client', phone: '919876543210', service: 'Gel polish', area: 'Hyderabad', date,
   time: '12:00 pm–3:00 pm', notes: 'Solid colour', consent: true };
@@ -37,6 +37,50 @@ test('customer request is saved, deduplicated and private', async () => {
     assert.equal(admin.requests.length, 1);
     assert.equal(admin.requests[0].customer_phone, details.phone);
   } finally {
+    closeCustomerRequestStorage();
+    for (const suffix of ['', '-wal', '-shm']) rmSync(`${file}${suffix}`, { force: true });
+  }
+});
+
+test('only a separately opted-in enquiry queues one approved WhatsApp template', async () => {
+  const previousFetch = globalThis.fetch;
+  const sent = [];
+  Object.assign(process.env, {
+    SAHAAN_WHATSAPP_REQUESTS_ENABLED: '1', META_WHATSAPP_TOKEN: 'test-token',
+    META_WHATSAPP_PHONE_NUMBER_ID: '12345', META_GRAPH_VERSION: 'v23.0',
+    META_TEMPLATE_REQUEST_RECEIVED: 'sahaan_request_received', META_TEMPLATE_LANGUAGE: 'en_US',
+  });
+  globalThis.fetch = async (_url, options) => {
+    sent.push(JSON.parse(options.body));
+    return new Response(JSON.stringify({ messages: [{ id: 'wamid.test' }] }),
+      { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    const health = await (await handleCustomerRequest(request('health'))).json();
+    assert.equal(health.whatsappAvailable, true);
+    const saved = await (await handleCustomerRequest(request('', 'POST', {
+      ...details, name: 'Opted-in test client', whatsappConsent: true,
+    }))).json();
+    assert.equal(saved.whatsappUpdate, 'queued');
+    const withoutOptIn = await (await handleCustomerRequest(request('', 'POST', {
+      ...details, phone: '919876543211', whatsappConsent: false,
+    }))).json();
+    assert.equal(withoutOptIn.whatsappUpdate, 'not_queued');
+    await drainCustomerRequestNotifications();
+    await drainCustomerRequestNotifications();
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].to, details.phone);
+    assert.equal(sent[0].template.name, 'sahaan_request_received');
+    assert.deepEqual(sent[0].template.components[0].parameters.map((item) => item.text),
+      ['Opted-in test client', saved.reference, details.service, date, details.time]);
+    const admin = await (await handleCustomerRequest(request('admin', 'GET', undefined,
+      { authorization: `Bearer ${process.env.SAHAAN_ADMIN_TOKEN}` }))).json();
+    assert.equal(admin.requests.find((item) => item.reference === saved.reference).whatsapp_status, 'submitted');
+    assert.equal(admin.requests.find((item) => item.reference === withoutOptIn.reference).whatsapp_status, null);
+  } finally {
+    globalThis.fetch = previousFetch;
+    for (const key of ['SAHAAN_WHATSAPP_REQUESTS_ENABLED','META_WHATSAPP_TOKEN','META_WHATSAPP_PHONE_NUMBER_ID',
+      'META_GRAPH_VERSION','META_TEMPLATE_REQUEST_RECEIVED','META_TEMPLATE_LANGUAGE']) delete process.env[key];
     closeCustomerRequestStorage();
     for (const suffix of ['', '-wal', '-shm']) rmSync(`${file}${suffix}`, { force: true });
   }

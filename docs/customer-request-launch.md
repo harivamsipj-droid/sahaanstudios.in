@@ -1,6 +1,6 @@
 # Customer request inbox — launch gate
 
-The mobile-first `/request` journey collects a **preferred** date and time, not a confirmed appointment. It shows indicative service prices and typical work times, then asks the client to submit a request. After a successful website save, the client receives a reference and is invited to open WhatsApp and press **Send**. This click-to-chat is **not** an automatic WhatsApp notification; Meta Business Platform approval is still pending. The request inbox is separate from the disabled payment flow.
+The mobile-first `/request` journey collects a **preferred** date and time, not a confirmed appointment. It shows indicative service prices and typical work times, then asks the client to submit a request. After a successful website save, the client receives a reference and is invited to open WhatsApp and press **Send**. This click-to-chat is **not** an automatic WhatsApp notification. Automatic acknowledgements are gated on the Meta Business Platform setup below. The request inbox is separate from the disabled payment flow.
 
 ## Before publishing as an operational booking channel
 
@@ -11,3 +11,11 @@ The mobile-first `/request` journey collects a **preferred** date and time, not 
 5. Verify Hostinger's database backup includes the new database. Arrange daily monitoring of the inbox, backup and restore tests, and a customer response procedure. Staff must confirm artist coverage, time, service scope, travel and final amount before taking payment. Set a retention and deletion procedure with counsel.
 
 The customer request API checks same-origin submissions, field limits and consent, and avoids repeat submissions from the same phone for the same service/date within two minutes. It has a bot honeypot but **no distributed rate limiter**; add host-level abuse protection before paid campaigns or high traffic.
+
+## Automatic WhatsApp acknowledgement — keep disabled until ready
+
+1. Complete Sahaan's Meta WhatsApp Business Platform setup with a verified sender and a long-lived access token. Do not put the token in GitHub or browser code. Confirm the selected sender number can be used with the current WhatsApp app arrangement before changing the existing public number.
+2. Create and obtain approval for a **utility** template named by `META_TEMPLATE_REQUEST_RECEIVED`, in the language configured by `META_TEMPLATE_LANGUAGE`. Its five body variables must appear in this order: customer name, Sahaan reference, service, preferred date, preferred time window. Suggested copy: “Hi {{1}}, Sahaan Studios received your {{3}} enquiry ({{2}}) for {{4}}, {{5}}. This is not a confirmed appointment. We will check the artist and final price before any payment. Reply here if you need help.” Meta must approve the actual template before sending.
+3. Add `META_WHATSAPP_TOKEN`, `META_WHATSAPP_PHONE_NUMBER_ID`, `META_GRAPH_VERSION`, `META_TEMPLATE_LANGUAGE`, and `META_TEMPLATE_REQUEST_RECEIVED` only to Hostinger's private environment variables. Leave `SAHAAN_WHATSAPP_REQUESTS_ENABLED=0` until a controlled test with a consenting, Sahaan-owned recipient passes; then change it to `1` and apply changes.
+4. Only customers who explicitly tick the separate WhatsApp updates box can be queued. No old enquiries are backfilled. The private inbox shows `pending`, `submitted`, `needs_review`, or `expired` for opted-in requests. `submitted` means Meta returned a message ID; it **does not prove delivery**. An ambiguous timeout needs staff review rather than an automatic resend. Respect opt-out requests manually until a verified inbound webhook workflow is in place.
+5. Artist notifications remain separate: no professional receives a customer's details at the enquiry stage. The managed-booking flow has an assignment notification path, but it stays disabled until payment, artist consent, approved templates, and the payment launch gates are complete.

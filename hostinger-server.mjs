@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import worker from './dist/server/index.js';
 import { drainBookingNotifications, handleManagedBooking } from './server/managed-bookings.mjs';
-import { handleCustomerRequest } from './server/customer-requests.mjs';
+import { drainCustomerRequestNotifications, handleCustomerRequest } from './server/customer-requests.mjs';
 
 const root = resolve(fileURLToPath(new URL('./dist/client/', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
@@ -133,4 +133,5 @@ server.listen(port, '0.0.0.0', () => {
 
 setInterval(() => {
   drainBookingNotifications().catch((error) => console.error('Booking notification retry:', error));
+  drainCustomerRequestNotifications().catch((error) => console.error('Request notification retry:', error));
 }, 60_000).unref();

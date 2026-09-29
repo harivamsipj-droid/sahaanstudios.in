@@ -5,6 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 let database;
 let mysqlPool;
 let mysqlReady;
+let drainingNotifications = false;
 const services = new Set(['Gel polish', 'Manicure', 'Nail extensions', 'Custom nail art']);
 const json = (value, status = 200) => new Response(JSON.stringify(value), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
@@ -17,8 +18,15 @@ function configured() {
   return (mysql || sqlite) && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32);
 }
 
-function useMysql() {
+function hasMysqlConfig() {
   return Boolean(process.env.SAHAAN_MYSQL_HOST);
+}
+
+export function customerWhatsappReady() {
+  return process.env.SAHAAN_WHATSAPP_REQUESTS_ENABLED === '1'
+    && Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
+    && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
+    && Boolean(process.env.META_TEMPLATE_REQUEST_RECEIVED);
 }
 
 async function mysql() {
@@ -42,6 +50,12 @@ async function mysql() {
         status VARCHAR(20) NOT NULL DEFAULT 'new', created_at DATETIME(3) NOT NULL,
         INDEX request_duplicate (customer_phone, service, preferred_date, created_at)
       )`);
+      await mysqlPool.query(`CREATE TABLE IF NOT EXISTS customer_request_outbox (
+        reference VARCHAR(24) PRIMARY KEY, state VARCHAR(20) NOT NULL DEFAULT 'pending',
+        attempts INT NOT NULL DEFAULT 0, meta_message_id VARCHAR(255),
+        last_error VARCHAR(120), created_at DATETIME(3) NOT NULL,
+        INDEX notification_state (state, created_at)
+      )`);
       return mysqlPool;
     })().catch((error) => { mysqlReady = undefined; throw error; });
   }
@@ -58,6 +72,11 @@ function db() {
         service TEXT NOT NULL, area TEXT NOT NULL, preferred_date TEXT NOT NULL,
         preferred_time TEXT NOT NULL, notes TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new',
         created_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS customer_request_outbox (
+        reference TEXT PRIMARY KEY, state TEXT NOT NULL DEFAULT 'pending',
+        attempts INTEGER NOT NULL DEFAULT 0, meta_message_id TEXT,
+        last_error TEXT, created_at TEXT NOT NULL
       );`);
   }
   return database;
@@ -80,25 +99,101 @@ export function closeCustomerRequestStorage() {
   const pool = mysqlPool;
   mysqlPool = undefined;
   mysqlReady = undefined;
+  drainingNotifications = false;
   return pool?.end();
+}
+
+async function sendRequestTemplate(item) {
+  const response = await fetch(`https://graph.facebook.com/${process.env.META_GRAPH_VERSION}/${process.env.META_WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${process.env.META_WHATSAPP_TOKEN}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ messaging_product: 'whatsapp', to: item.customer_phone, type: 'template', template: {
+      name: process.env.META_TEMPLATE_REQUEST_RECEIVED,
+      language: { code: process.env.META_TEMPLATE_LANGUAGE || 'en_US' },
+      components: [{ type: 'body', parameters: [item.customer_name, item.reference, item.service,
+        item.visit_date, item.preferred_time].map((text) => ({ type: 'text', text: String(text) })) }],
+    } }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) throw new Error(`Meta HTTP ${response.status}`);
+  const result = await response.json();
+  const messageId = result.messages?.[0]?.id;
+  if (typeof messageId !== 'string' || !messageId) throw new Error('Meta response lacked a message ID');
+  return messageId;
+}
+
+/** Accepts approved, opted-in request templates only. A Meta ID means submitted, not delivered. */
+export async function drainCustomerRequestNotifications() {
+  if (drainingNotifications || !configured() || !customerWhatsappReady()) return;
+  drainingNotifications = true;
+  try {
+    const storage = hasMysqlConfig() ? await mysql() : db();
+    const cutoff = new Date(Date.now() - 60 * 60_000);
+    let pending;
+    if (hasMysqlConfig()) {
+      await storage.execute(`UPDATE customer_request_outbox SET state='expired' WHERE state='pending' AND created_at<?`, [cutoff]);
+      await storage.execute(`UPDATE customer_request_outbox SET state='needs_review' WHERE state='pending' AND attempts>=3`);
+      [pending] = await storage.execute(`SELECT o.reference,r.customer_name,r.customer_phone,r.service,
+        DATE_FORMAT(r.preferred_date,'%Y-%m-%d') AS visit_date,r.preferred_time
+        FROM customer_request_outbox o JOIN customer_requests r ON r.reference=o.reference
+        WHERE o.state='pending' AND o.attempts<3 ORDER BY o.created_at LIMIT 10`);
+    } else {
+      storage.prepare(`UPDATE customer_request_outbox SET state='expired' WHERE state='pending' AND created_at<?`)
+        .run(cutoff.toISOString());
+      storage.prepare(`UPDATE customer_request_outbox SET state='needs_review' WHERE state='pending' AND attempts>=3`).run();
+      pending = storage.prepare(`SELECT o.reference,r.customer_name,r.customer_phone,r.service,
+        r.preferred_date AS visit_date,r.preferred_time
+        FROM customer_request_outbox o JOIN customer_requests r ON r.reference=o.reference
+        WHERE o.state='pending' AND o.attempts<3 ORDER BY o.created_at LIMIT 10`).all();
+    }
+    for (const item of pending) {
+      const claimed = hasMysqlConfig()
+        ? (await storage.execute(`UPDATE customer_request_outbox SET state='sending',attempts=attempts+1
+            WHERE reference=? AND state='pending'`, [item.reference]))[0].affectedRows
+        : storage.prepare(`UPDATE customer_request_outbox SET state='sending',attempts=attempts+1
+            WHERE reference=? AND state='pending'`).run(item.reference).changes;
+      if (!claimed) continue;
+      try {
+        const messageId = await sendRequestTemplate(item);
+        if (hasMysqlConfig()) await storage.execute(`UPDATE customer_request_outbox
+          SET state='submitted',meta_message_id=?,last_error=NULL WHERE reference=?`, [messageId,item.reference]);
+        else storage.prepare(`UPDATE customer_request_outbox SET state='submitted',meta_message_id=?,last_error=NULL
+          WHERE reference=?`).run(messageId,item.reference);
+      } catch (error) {
+        // A timed-out request may have reached Meta. Manual review prevents duplicate messages.
+        const state = String(error).startsWith('Error: Meta HTTP 429') ? 'pending' : 'needs_review';
+        const reason = error instanceof Error ? error.message.slice(0,120) : 'Unknown send error';
+        if (hasMysqlConfig()) await storage.execute(`UPDATE customer_request_outbox SET state=?,last_error=?
+          WHERE reference=?`, [state,reason,item.reference]);
+        else storage.prepare(`UPDATE customer_request_outbox SET state=?,last_error=? WHERE reference=?`)
+          .run(state,reason,item.reference);
+      }
+    }
+  } finally {
+    drainingNotifications = false;
+  }
 }
 
 export async function handleCustomerRequest(request) {
   if (!configured()) return json({ error: 'Website request storage is not available. Please send your request on WhatsApp instead.' }, 503);
   const url = new URL(request.url);
   if (request.method === 'GET' && url.pathname.endsWith('/health')) {
-    try { if (useMysql()) await mysql(); else db(); return json({ enabled: true }); }
+    try { if (hasMysqlConfig()) await mysql(); else db(); return json({ enabled: true, whatsappAvailable: customerWhatsappReady() }); }
     catch { return json({ enabled: false, error: 'Website request storage is unavailable.' }, 503); }
   }
 
   if (request.method === 'GET' && url.pathname.endsWith('/admin')) {
     if (!safeEqual(request.headers.get('authorization'), `Bearer ${process.env.SAHAAN_ADMIN_TOKEN}`)) return json({ error: 'Not authorized' }, 401);
-    const rows = useMysql()
-      ? (await (await mysql()).execute(`SELECT reference, customer_name, customer_phone, service, area,
-          DATE_FORMAT(preferred_date, '%Y-%m-%d') AS preferred_date, preferred_time, notes, status,
-          DATE_FORMAT(created_at, '%Y-%m-%dT%H:%i:%s.000Z') AS created_at
-          FROM customer_requests ORDER BY created_at DESC LIMIT 100`))[0]
-      : db().prepare('SELECT * FROM customer_requests ORDER BY created_at DESC LIMIT 100').all();
+    const rows = hasMysqlConfig()
+      ? (await (await mysql()).execute(`SELECT r.reference,r.customer_name,r.customer_phone,r.service,r.area,
+          DATE_FORMAT(r.preferred_date, '%Y-%m-%d') AS preferred_date,r.preferred_time,r.notes,r.status,
+          DATE_FORMAT(r.created_at, '%Y-%m-%dT%H:%i:%s.000Z') AS created_at,
+          o.state AS whatsapp_status,o.last_error AS whatsapp_error
+          FROM customer_requests r LEFT JOIN customer_request_outbox o ON o.reference=r.reference
+          ORDER BY r.created_at DESC LIMIT 100`))[0]
+      : db().prepare(`SELECT r.*,o.state AS whatsapp_status,o.last_error AS whatsapp_error
+          FROM customer_requests r LEFT JOIN customer_request_outbox o ON o.reference=r.reference
+          ORDER BY r.created_at DESC LIMIT 100`).all();
     return json({ requests: rows });
   }
 
@@ -128,20 +223,34 @@ export async function handleCustomerRequest(request) {
   }
   const reference = `SH-${randomBytes(5).toString('hex').toUpperCase()}`;
   const cutoff = new Date(Date.now() - 2 * 60_000);
-  const storage = useMysql() ? await mysql() : db();
-  const duplicate = useMysql()
+  const storage = hasMysqlConfig() ? await mysql() : db();
+  const duplicate = hasMysqlConfig()
     ? (await storage.execute(`SELECT reference FROM customer_requests WHERE customer_phone=? AND service=? AND preferred_date=? AND created_at>=? LIMIT 1`,
         [phone, service, date, cutoff]))[0][0]
     : storage.prepare(`SELECT reference FROM customer_requests WHERE customer_phone=? AND service=? AND preferred_date=? AND created_at>=? LIMIT 1`)
       .get(phone, service, date, cutoff.toISOString());
-  if (duplicate) return json({ reference: duplicate.reference, status: 'request_received' });
+  if (duplicate) return json({ reference: duplicate.reference, status: 'request_received', whatsappUpdate: 'not_queued' });
   const values = [reference, name, phone, service, area, date, time, notes, new Date()];
-  if (useMysql()) {
-    await storage.execute(`INSERT INTO customer_requests(reference,customer_name,customer_phone,service,area,preferred_date,preferred_time,notes,created_at)
-      VALUES(?,?,?,?,?,?,?,?,?)`, values);
+  const notifyCustomer = customerWhatsappReady() && input.whatsappConsent === true;
+  if (hasMysqlConfig()) {
+    const connection = await storage.getConnection();
+    try {
+      await connection.beginTransaction();
+      await connection.execute(`INSERT INTO customer_requests(reference,customer_name,customer_phone,service,area,preferred_date,preferred_time,notes,created_at)
+        VALUES(?,?,?,?,?,?,?,?,?)`, values);
+      if (notifyCustomer) await connection.execute(`INSERT INTO customer_request_outbox(reference,created_at) VALUES(?,?)`, [reference,values[8]]);
+      await connection.commit();
+    } catch (error) { await connection.rollback(); throw error; }
+    finally { connection.release(); }
   } else {
-    storage.prepare(`INSERT INTO customer_requests(reference,customer_name,customer_phone,service,area,preferred_date,preferred_time,notes,created_at)
-      VALUES(?,?,?,?,?,?,?,?,?)`).run(reference, name, phone, service, area, date, time, notes, values[8].toISOString());
+    storage.exec('BEGIN');
+    try {
+      storage.prepare(`INSERT INTO customer_requests(reference,customer_name,customer_phone,service,area,preferred_date,preferred_time,notes,created_at)
+        VALUES(?,?,?,?,?,?,?,?,?)`).run(reference, name, phone, service, area, date, time, notes, values[8].toISOString());
+      if (notifyCustomer) storage.prepare(`INSERT INTO customer_request_outbox(reference,created_at) VALUES(?,?)`)
+        .run(reference,values[8].toISOString());
+      storage.exec('COMMIT');
+    } catch (error) { storage.exec('ROLLBACK'); throw error; }
   }
-  return json({ reference, status: 'request_received' }, 201);
+  return json({ reference, status: 'request_received', whatsappUpdate: notifyCustomer ? 'queued' : 'not_queued' }, 201);
 }
