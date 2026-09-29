@@ -1,6 +1,6 @@
 # Sahaan managed-payment launch checklist
 
-The code is **off by default**. Publishing the website does not activate payment collection. The founder must complete and test every item below before setting `SAHAAN_PAYMENTS_ENABLED=1` and `SAHAAN_POLICY_APPROVED=1` in the private hosting environment. Never put a live API key, admin token, customer address or booking database in GitHub.
+The code is **off by default**. Publishing the website does not activate payment collection. The founder must complete and test every item below before setting `SAHAAN_PAYMENTS_ENABLED=1` and `SAHAAN_POLICY_APPROVED=1` in the private hosting environment. Never put any API secret, webhook secret, admin token, customer address or booking database in GitHub. The Razorpay key **ID** is public by design, but keep it in hosting too so test and live environments are not confused.
 
 ## Customer and professional journey
 
@@ -32,9 +32,9 @@ The artist's template includes a customer's exact address and phone number **onl
 ## Test and go-live gate
 
 1. Keep `SAHAAN_PAYMENTS_ENABLED=0` while setting up. A health check at `/api/managed-bookings/health` should report disabled.
-2. Configure test keys and Meta test sender. Set `SAHAAN_POLICY_APPROVED=1` only after founder/legal review, and temporarily set the payment switch to `1` in a controlled test deployment.
-3. Create a test quote, open it on desktop and mobile, complete a Razorpay **test** transaction, confirm the server marks it `paid_unassigned`, and verify exactly one customer notification.
-4. Assign a test professional and confirm both customer and artist updates. Replay a signed webhook and confirm it does not create another booking. Test failure, cancellation, no-match and refund handling.
-5. Check backups and restore a copy of the booking database. Confirm restricted file permissions, monitoring and on-call coverage. Then install live keys and approve the public launch.
+2. For an internal simulation only, install Razorpay **test** keys and a test webhook secret in Hostinger private settings, set `SAHAAN_PAYMENT_TEST_MODE=1`, and use a private, writable absolute `SAHAAN_DATA_FILE` path. A temporary file may be used only for synthetic test data: it can disappear on restart or deployment and is **never** suitable for real payments. Set `SAHAAN_POLICY_APPROVED=1` only after the founder approves the published policy, and enable `SAHAAN_PAYMENTS_ENABLED=1` only for this controlled simulation. Health should then report `{"enabled":true,"testMode":true}`.
+3. In test mode, the booking desk accepts only a customer named `TEST ...`, a service address starting `TEST `, synthetic customer number `919999999999`, and test artist number `919999999998` with a `TEST ...` name. Never enter real customer data, send a test link to a customer, or use a real card. The checkout prominently states that no real money, appointment or WhatsApp message results. Complete a Razorpay test transaction and confirm the stored state becomes `paid_unassigned`.
+4. Replay a signed **test** webhook and confirm it does not duplicate a booking. Test failure, cancellation, no-match and refund events. Test mode deliberately sends **no WhatsApp**; Meta notifications require a separate verified sender/template test.
+5. Before any real payment, move booking storage to a private durable backed-up location that survives Hostinger builds, restart and restore testing. Hostinger's `hbuilds` and `public_html` are overwritten during deployment, so neither is appropriate. Test live-mode notifications with approved Meta templates, verify message delivery, and establish human monitoring of paid-but-unassigned bookings. Then set `SAHAAN_PAYMENT_TEST_MODE=0`, install **live** keys and a separate **live** webhook, and approve the public launch only after an end-to-end operational review.
 
 The current implementation does **not** automatically issue refunds, make artist payouts, send invoices, or reconcile bank settlements. These remain manual founder tasks during the pilot. It does not charge a customer based on the public price guide or a Google-listed business profile.

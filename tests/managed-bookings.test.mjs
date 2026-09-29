@@ -9,7 +9,7 @@ const databaseFile = join(tmpdir(), `sahaan-payment-test-${randomUUID()}.sqlite`
 Object.assign(process.env, {
   SAHAAN_PAYMENTS_ENABLED: '1', SAHAAN_POLICY_APPROVED: '1',
   SAHAAN_DATA_FILE: databaseFile, SAHAAN_ADMIN_TOKEN: 'test_admin_token_longer_than_32_characters',
-  RAZORPAY_KEY_ID: 'rzp_test_example', RAZORPAY_KEY_SECRET: 'test_razorpay_secret',
+  RAZORPAY_KEY_ID: 'rzp_live_example', RAZORPAY_KEY_SECRET: 'test_razorpay_secret',
   RAZORPAY_WEBHOOK_SECRET: 'test_webhook_secret',
   META_WHATSAPP_TOKEN: 'test_meta_token', META_WHATSAPP_PHONE_NUMBER_ID: '123456789',
   META_GRAPH_VERSION: 'v99.0', META_TEMPLATE_PAYMENT: 'payment_test',
@@ -109,5 +109,60 @@ test('managed payment is captured before artist assignment and handles duplicate
     closeManagedBookingStorage();
     globalThis.fetch = originalFetch;
     for (const suffix of ['', '-wal', '-shm']) rmSync(`${databaseFile}${suffix}`, { force: true });
+  }
+});
+
+test('test mode accepts only fictional bookings and sends no WhatsApp messages', async () => {
+  const testFile = join(tmpdir(), `sahaan-payment-simulation-${randomUUID()}.sqlite`);
+  const previousFetch = globalThis.fetch;
+  Object.assign(process.env, {
+    SAHAAN_PAYMENT_TEST_MODE: '1', SAHAAN_DATA_FILE: testFile,
+    RAZORPAY_KEY_ID: 'rzp_test_example',
+  });
+  delete process.env.META_WHATSAPP_TOKEN;
+  delete process.env.META_WHATSAPP_PHONE_NUMBER_ID;
+  let amount = 0;
+  globalThis.fetch = async (url, options = {}) => {
+    const target = typeof url === 'string' ? url : url instanceof URL ? url.href : url.url;
+    if (target.endsWith('/v1/orders')) {
+      amount = JSON.parse(options.body).amount;
+      return new Response(JSON.stringify({ id: 'order_sim123' }), { status: 200 });
+    }
+    if (target.endsWith('/v1/payments/pay_sim123')) {
+      return new Response(JSON.stringify({ id: 'pay_sim123', status: 'captured',
+        order_id: 'order_sim123', amount, currency: 'INR' }), { status: 200 });
+    }
+    throw new Error(`Test mode must not call ${target}`);
+  };
+  try {
+    assert.deepEqual((await call('/health')).data, { enabled: true, testMode: true });
+    const details = {
+      customerName: 'TEST Customer', customerPhone: '919999999999', service: 'Gel polish',
+      scope: 'Synthetic test', serviceAddress: 'TEST address, Hyderabad',
+      appointmentWindow: 'Test date', servicePaise: 49900, travelPaise: 0,
+      extrasPaise: 0, taxPaise: 0, coverageConfirmed: true,
+    };
+    assert.equal((await call('/admin/quotes', 'POST', { ...details, customerPhone: '919876543210' }, true)).code, 400);
+    const created = await call('/admin/quotes', 'POST', details, true);
+    assert.equal(created.code, 201);
+    const quoteToken = new URL(created.data.checkoutUrl).pathname.split('/').pop();
+    assert.equal((await call(`/quote?token=${quoteToken}`)).data.testMode, true);
+    const order = await call('/order', 'POST', { token: quoteToken, consent: true });
+    assert.equal(order.code, 200);
+    const signature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update('order_sim123|pay_sim123').digest('hex');
+    const verified = await call('/verify', 'POST', { token: quoteToken, orderId: 'order_sim123',
+      paymentId: 'pay_sim123', signature });
+    assert.equal(verified.data.status, 'paid_unassigned');
+    assert.equal((await call('/admin/assign', 'POST', { reference: created.data.reference,
+      artistName: 'TEST Artist', artistPhone: '919876543210', artistConsented: true }, true)).code, 400);
+    assert.equal((await call('/admin/assign', 'POST', { reference: created.data.reference,
+      artistName: 'TEST Artist', artistPhone: '919999999998', artistConsented: true }, true)).code, 200);
+    const admin = await call('/admin/quotes', 'GET', undefined, true);
+    assert.equal(admin.data.notifications.length, 0);
+  } finally {
+    closeManagedBookingStorage();
+    globalThis.fetch = previousFetch;
+    for (const suffix of ['', '-wal', '-shm']) rmSync(`${testFile}${suffix}`, { force: true });
   }
 });

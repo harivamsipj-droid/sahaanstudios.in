@@ -3829,6 +3829,8 @@ textarea::placeholder {
 .managed-booking-page > header a span { display:block; font:10px Arial,sans-serif; letter-spacing:.4em; text-align:center; }
 .managed-booking-page > header > span { font-size:12px; color:#75532d; text-transform:uppercase; letter-spacing:.12em; }
 .managed-booking-card { max-width:740px; margin:52px auto; padding:clamp(24px,5vw,56px); background:#fff; border:1px solid #ded4c5; box-shadow:0 15px 60px #3b250f0b; }
+.managed-booking-test { display:block; padding:18px 20px; border:2px solid #9b2920; background:#fff2ed; color:#642117; font-size:16px; line-height:1.55; }
+.managed-booking-test strong { display:block; font-size:19px; }
 .managed-booking-card h1 { margin:12px 0; font:clamp(34px,6vw,53px)/1.1 Georgia,serif; }
 .managed-booking-intro { color:#665a4d; }
 .managed-booking-details { margin:30px 0; display:grid; gap:0; }

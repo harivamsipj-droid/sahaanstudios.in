@@ -15,14 +15,22 @@ const json = (value, status = 200) => new Response(JSON.stringify(value), {
 });
 
 function configured() {
+  const testMode = process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
+  const liveMode = process.env.SAHAAN_PAYMENT_TEST_MODE !== '1'
+    && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_live_')
+    && Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
+    && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
+    && Boolean(process.env.META_TEMPLATE_PAYMENT && process.env.META_TEMPLATE_CUSTOMER_ASSIGNED && process.env.META_TEMPLATE_ARTIST_ASSIGNED);
   return process.env.SAHAAN_PAYMENTS_ENABLED === '1'
     && process.env.SAHAAN_POLICY_APPROVED === '1'
     && Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
     && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32)
     && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET)
-    && Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
-    && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
-    && Boolean(process.env.META_TEMPLATE_PAYMENT && process.env.META_TEMPLATE_CUSTOMER_ASSIGNED && process.env.META_TEMPLATE_ARTIST_ASSIGNED);
+    && (testMode || liveMode);
+}
+
+function testMode() {
+  return process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
 }
 
 function db() {
@@ -93,6 +101,7 @@ function publicQuote(row) {
     extrasPaise: row.extras_paise, taxPaise: row.tax_paise, totalPaise: row.total_paise,
     status: row.status, expiresAt: row.expires_at,
     artistName: row.status === 'assigned' ? row.artist_name : null,
+    testMode: testMode(),
   };
 }
 
@@ -114,7 +123,7 @@ function markPaid(row, paymentId) {
     WHERE id=? AND status IN ('quoted','payment_pending') AND (razorpay_payment_id IS NULL OR razorpay_payment_id=?)`)
     .run(paymentId, new Date().toISOString(), row.id, paymentId);
   const updated = store.prepare('SELECT * FROM quotes WHERE id=?').get(row.id);
-  if (updated?.razorpay_payment_id === paymentId) {
+  if (!testMode() && updated?.razorpay_payment_id === paymentId) {
     store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'payment_customer')`).run(row.id);
   }
   return updated;
@@ -134,7 +143,7 @@ async function sendTemplate(to, name, parameters) {
 }
 
 export async function drainBookingNotifications() {
-  if (!configured()) return;
+  if (!configured() || testMode()) return;
   const store = db();
   const pending = store.prepare(`SELECT o.id AS notification_id, o.kind, q.* FROM notification_outbox o
     JOIN quotes q ON q.id=o.quote_id WHERE o.state='pending' AND o.attempts<10 ORDER BY o.id LIMIT 10`).all();
@@ -164,7 +173,11 @@ export async function drainBookingNotifications() {
 export async function handleManagedBooking(request) {
   const url = new URL(request.url);
   const path = url.pathname.replace('/api/managed-bookings', '');
-  if (path === '/health' && request.method === 'GET') return json({ enabled: configured() });
+  if (path === '/health' && request.method === 'GET') {
+    if (!configured()) return json({ enabled: false, testMode: false });
+    try { db(); return json({ enabled: true, testMode: testMode() }); }
+    catch { return json({ enabled: false, testMode: testMode() }, 503); }
+  }
   if (!configured()) return json({ error: 'Online booking payments are not available yet.' }, 503);
   if (request.method !== 'GET' && !sameOrigin(request) && path !== '/webhook') return json({ error: 'Origin not allowed' }, 403);
   try {
@@ -188,6 +201,10 @@ export async function handleManagedBooking(request) {
         extrasPaise: amount(input.extrasPaise), taxPaise: amount(input.taxPaise),
       };
       if (!/^91[6-9][0-9]{9}$/.test(row.customerPhone)) return json({ error: 'Use an Indian WhatsApp number with 91 prefix' }, 400);
+      if (testMode() && (row.customerPhone !== '919999999999' || !row.customerName.toUpperCase().startsWith('TEST ')
+        || !row.serviceAddress.toUpperCase().startsWith('TEST '))) {
+        return json({ error: 'Test mode accepts only TEST names, TEST addresses and the synthetic 919999999999 number.' }, 400);
+      }
       const total = row.servicePaise + row.travelPaise + row.extrasPaise + row.taxPaise;
       if (total < 100 || total > 2_000_000) return json({ error: 'Invalid total' }, 400);
       const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -206,7 +223,7 @@ export async function handleManagedBooking(request) {
     }
     if (path === '/order' && request.method === 'POST') {
       const input = await body(request);
-      if (input.consent !== true) return json({ error: 'Please approve the quote and WhatsApp booking updates.' }, 400);
+      if (input.consent !== true) return json({ error: testMode() ? 'Please approve this simulated test transaction.' : 'Please approve the quote and WhatsApp booking updates.' }, 400);
       const row = store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
       if (!row) return json({ error: 'Quote not found' }, 404);
       if (new Date(row.expires_at) < new Date()) return json({ error: 'This quote has expired; ask Sahaan for a new quote.' }, 409);
@@ -258,16 +275,21 @@ export async function handleManagedBooking(request) {
     if (path === '/admin/assign' && request.method === 'POST') {
       if (!adminAllowed(request)) return json({ error: 'Unauthorized' }, 401);
       const input = await body(request);
-      if (input.artistConsented !== true) return json({ error: 'Confirm the professional agreed to receive this assignment on WhatsApp' }, 400);
+      if (input.artistConsented !== true) return json({ error: testMode() ? 'Confirm this is a simulated test assignment' : 'Confirm the professional agreed to receive this assignment on WhatsApp' }, 400);
       const artistName = clean(input.artistName, 100);
       const artistPhone = clean(input.artistPhone, 16);
       if (!/^91[6-9][0-9]{9}$/.test(artistPhone)) return json({ error: 'Use an Indian WhatsApp number with 91 prefix' }, 400);
+      if (testMode() && (artistPhone !== '919999999998' || !artistName.toUpperCase().startsWith('TEST '))) {
+        return json({ error: 'Test mode accepts only a TEST artist and the synthetic 919999999998 number.' }, 400);
+      }
       const now = new Date().toISOString();
       const updated = store.prepare(`UPDATE quotes SET status='assigned',artist_name=?,artist_phone=?,artist_consent_at=?,assigned_at=? WHERE id=? AND status='paid_unassigned'`)
         .run(artistName,artistPhone,now,now,input.reference);
       if (!updated.changes) return json({ error: 'Only a paid, unassigned request can be assigned' }, 409);
-      store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
-      store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
+      if (!testMode()) {
+        store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
+        store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
+      }
       await drainBookingNotifications();
       return json({ status: 'assigned' });
     }
