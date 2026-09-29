@@ -64,19 +64,20 @@ test('managed payment is captured before artist assignment and handles duplicate
     const details = {
       customerName: 'Test Client', customerPhone: '919876543210', service: 'Gel polish',
       scope: 'Gel polish on natural nails', serviceAddress: 'Test address, Hyderabad',
-      appointmentWindow: '1 October, 2–4 pm', servicePaise: 59900, travelPaise: 10000,
+      appointmentWindow: '1 October, 2–4 pm', servicePaise: 49900, travelPaise: 10000,
       extrasPaise: 0, taxPaise: 0,
     };
     assert.equal((await call('/admin/quotes', 'POST', details, true)).code, 400);
+    assert.equal((await call('/admin/quotes', 'POST', { ...details, coverageConfirmed: true, travelPaise: 20000 }, true)).code, 400);
     const created = await call('/admin/quotes', 'POST', { ...details, coverageConfirmed: true }, true);
     assert.equal(created.code, 201);
     const token = new URL(created.data.checkoutUrl).pathname.split('/').pop();
     const quote = await call(`/quote?token=${token}`);
-    assert.equal(quote.data.totalPaise, 69900);
+    assert.equal(quote.data.totalPaise, 59900);
     assert.equal(quote.data.status, 'quoted');
     assert.equal((await call('/order', 'POST', { token, consent: false })).code, 400);
     const order = await call('/order', 'POST', { token, consent: true });
-    assert.equal(order.data.amount, 69900);
+    assert.equal(order.data.amount, 59900);
     assert.equal(order.data.orderId, issuedOrder);
     assert.equal((await call('/verify', 'POST', { token, orderId: issuedOrder,
       paymentId: 'pay_test123', signature: 'wrong' })).code, 400);
@@ -93,7 +94,7 @@ test('managed payment is captured before artist assignment and handles duplicate
     assert.equal(assignment.data.status, 'assigned');
     assert.equal(messages.length, 3);
     const webhook = { event: 'payment.captured', payload: { payment: { entity: {
-      id: 'pay_test123', status: 'captured', order_id: issuedOrder, amount: 69900, currency: 'INR',
+      id: 'pay_test123', status: 'captured', order_id: issuedOrder, amount: 59900, currency: 'INR',
     } } } };
     const raw = JSON.stringify(webhook);
     const webhookSignature = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
@@ -101,7 +102,7 @@ test('managed payment is captured before artist assignment and handles duplicate
     assert.equal((await call('/webhook', 'POST', webhook, false, webhookSignature)).code, 200);
     assert.equal(messages.length, 3);
     const refund = { event: 'refund.processed', payload: { refund: { entity: {
-      payment_id: 'pay_test123', status: 'processed', amount: 69900,
+      payment_id: 'pay_test123', status: 'processed', amount: 59900,
     } } } };
     const refundSignature = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
       .update(JSON.stringify(refund)).digest('hex');

@@ -118,7 +118,7 @@ export default function ProfessionalsPage() {
   }
 
   function requestSalon(place: GooglePlaceResult) {
-    const message = `Hi Sahaan! I found ${place.name} ${customerLocation ? 'near my current area' : `near Hyderabad PIN ${pinCode}`}. I am interested in ${service}${requestedDate ? ` on ${requestedDate}` : ''}. Is this business a Sahaan partner? If not, please tell me whether you can help with a similar service. I can share my exact service address and any design photo privately here. Please send my service price, travel charge, any additional charges and final total before I decide. This is only an enquiry, not a booking.\n\nGoogle Maps profile: ${place.mapsUrl}`;
+    const message = `Hi Sahaan! I found ${place.name} ${customerLocation ? 'near my current area' : `near Hyderabad PIN ${pinCode}`}. I am interested in ${service}${requestedDate ? ` on ${requestedDate}` : ''}. Is this business a Sahaan partner? If not, please tell me whether you can help with a similar service. I can share my exact service address and any design photo privately here. Please confirm the customer price including travel, any requested extras and the final total before I decide. This is only an enquiry, not a booking.\n\nGoogle Maps profile: ${place.mapsUrl}`;
     window.open(sahaanWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
   }
 

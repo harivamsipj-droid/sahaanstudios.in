@@ -1,16 +1,16 @@
-# Service-price guide — 28 September 2026
+# Sahaan service-price policy — 30 September 2026
 
-These are indicative Hyderabad market references, **not** confirmed Sahaan artist quotes or bookable prices. Recheck published menus regularly and replace the guide with real partner prices once artists provide their own service rates. Confirm the complete customer total, including travel, scope, add-ons and applicable taxes, before payment or booking.
+The public menu uses Sahaan's own base-service prices, selected to align with comparable services on [Urban Company's Hyderabad nail menu](https://www.urbancompany.com/hyderabad-salon-nails). Sahaan is not affiliated with Urban Company, and its changing catalogue is only a benchmark—not a live price feed or a guarantee of artist availability.
 
-| Launch service | Customer-facing guide | Published reference |
-| --- | --- | --- |
-| Gel polish | ₹499–₹699, basic solid colour | Founder-selected range; [Simore Nail Tonique](https://simorenailtonique.in/services) lists hands at ₹499; [Urban Company Hyderabad](https://www.urbancompany.com/hyderabad-salon-nails) starts at ₹599. |
-| Manicure | ₹699–₹1,199 | [Simore](https://simorenailtonique.in/services) lists multiple manicure tiers at ₹699, ₹999 and ₹1,199; [Urban Company Hyderabad](https://www.urbancompany.com/hyderabad-salon-nails) lists an advanced manicure at ₹999. |
-| Nail extensions | ₹1,399–₹2,499, typical full-hand set | [Urban Company Hyderabad](https://www.urbancompany.com/hyderabad-salon-nails) starts at ₹1,399; [Simore](https://simorenailtonique.in/services) lists softgel at ₹1,399 and gel at ₹1,899; [Toni & Guy Financial District](https://www.toniandguyfinancialdistrict.com/pedicure/) lists a full set at ₹2,500. The displayed upper end is a rounded planning figure, not a published Sahaan price. |
-| Custom nail art | ₹75–₹250 per nail | [Simore](https://simorenailtonique.in/services) lists basic at ₹75 and premium at ₹250 per finger. Complex 3D or bridal work requires an individual estimate. |
+| Sahaan service | Published customer price | Defined base scope | Urban Company Hyderabad reference |
+| --- | ---: | --- | --- |
+| Gel polish | ₹599 | Solid colour on both hands; old polish removal excluded | “Gel polish - both hands” starts at ₹599. |
+| Manicure | ₹999 | Advanced hand care with regular polish; gel polish separate | “Advance manicure” is ₹999. |
+| Nail extensions | ₹1,399 | Basic full-hand extension set; removal and custom art separate | “Nail extensions - both hands” starts at ₹1,399. |
+| Custom nail art | Design-specific quote | Customer shares the design and nail count | No standalone custom nail-art price is published on that Hyderabad menu. |
 
-Prices may change and service inclusions differ. The website avoids showing the platform’s internal commission calculation to customers; it shows only this planning guide and promises a complete final quote before they decide.
+Each published Sahaan price **includes travel to an eligible Hyderabad address**. There is no separate customer travel surcharge for the defined base scope. The booking desk may allocate part of that price to artist travel internally; in live mode the server requires the service component plus travel allocation to equal the published base price. Sahaan must check artist coverage and rate before creating a payable quote. If the base service cannot be provided at the displayed price, tell the customer before requesting payment. Removal, customer-requested extras and applicable taxes, if any, must be itemised and approved before payment. Custom nail-art quotes must include travel in the final customer total.
 
-## Mobile duration guide
+Typical times are Sahaan planning estimates, not appointment guarantees: gel polish 45–75 minutes, advanced manicure 75 minutes and a basic full-hand extension set 2–3 hours 15 minutes. Nail-art time depends on the design. Confirm the time window before booking.
 
-The website also shows **Sahaan planning estimates**, not guaranteed appointment lengths: gel polish 45–75 minutes, manicure 45–75 minutes, a full-hand extension set 2–3 hours 15 minutes, and nail art 15–30 minutes per nail. The artist must confirm the actual work time and available time window before a booking is confirmed. These are not copied Urban Company durations. For context, [Urban Company's Hyderabad nail menu](https://www.urbancompany.com/hyderabad-salon-nails) lists an advanced manicure at 1 hour 15 minutes, a gel polish plus removal package at 1 hour 30 minutes, and an extension plus removal package at 3 hours 15 minutes. Package durations include different work from Sahaan's basic services, so they are comparison points only.
+Recheck the linked Urban Company catalogue regularly. Do not automatically change Sahaan prices when a competitor changes theirs; review artist economics, coverage and the customer promise first.

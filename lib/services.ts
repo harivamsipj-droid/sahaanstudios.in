@@ -1,8 +1,10 @@
+import { standardServicePrices } from './pricing.mjs';
+
 export const customerServices = [
-  { name: 'Gel polish', price: '₹499–₹699', duration: '45–75 min', details: 'Solid colour on natural nails; removal is separate.' },
-  { name: 'Manicure', price: '₹699–₹1,199', duration: '45–75 min', details: 'Nail shaping and care; gel polish is separate unless quoted.' },
-  { name: 'Nail extensions', price: '₹1,399–₹2,499', duration: '2–3 hr 15 min', details: 'Full-hand set; length, material, removal and art affect the quote.' },
-  { name: 'Custom nail art', price: '₹75–₹250 / nail', duration: '15–30 min / nail', details: 'Design and complexity determine the work and time.' },
+  { name: 'Gel polish', price: standardServicePrices['Gel polish'].display, duration: '45–75 min', details: 'Solid colour on both hands; old polish removal is not included.' },
+  { name: 'Manicure', price: standardServicePrices['Manicure'].display, duration: '75 min', details: 'Advanced hand care with regular polish; gel polish is a separate add-on.' },
+  { name: 'Nail extensions', price: standardServicePrices['Nail extensions'].display, duration: '2–3 hr 15 min', details: 'Basic full-hand extension set; removal and custom art are separate.' },
+  { name: 'Custom nail art', price: 'Design quote', duration: 'Depends on design', details: 'Share a design and nail count. Sahaan will confirm one total including travel before payment.' },
 ] as const;
 
 export type CustomerServiceName = (typeof customerServices)[number]['name'];

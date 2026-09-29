@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { isAbsolute } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { standardServicePrices } from '../lib/pricing.mjs';
 
 let database;
 let mysqlPool;
@@ -282,6 +283,10 @@ export async function handleManagedBooking(request) {
         return json({ error: 'Test mode accepts only TEST names, TEST addresses and the synthetic 919999999999 number.' }, 400);
       }
       const total = row.servicePaise + row.travelPaise + row.extrasPaise + row.taxPaise;
+      const publishedPrice = standardServicePrices[row.service]?.paise;
+      if (!testMode() && publishedPrice !== undefined && row.servicePaise + row.travelPaise !== publishedPrice) {
+        return json({ error: 'The listed base-service price already includes travel. Service plus travel must equal the published price; optional extras and taxes must be itemised separately.' }, 400);
+      }
       if (total < 100 || total > 2_000_000) return json({ error: 'Invalid total' }, 400);
       const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
       await store.prepare(`INSERT INTO quotes(id,token,customer_name,customer_phone,service,scope,service_address,appointment_window,

@@ -3,11 +3,11 @@ import Link from 'next/link';
 
 export default function CancellationRefundsPage() {
   return <main className="legal-page"><header className="market-header inner-header"><Link className="market-brand" href="/"><span className="market-monogram">S</span><span><strong>SAHAAN</strong><small>HYDERABAD LAUNCH</small></span></Link><Link className="profile-back" href="/">Back to website</Link></header><article>
-    <p className="eyebrow">Last updated 28 September 2026</p>
+    <p className="eyebrow">Last updated 30 September 2026</p>
     <h1>Cancellation & Refund Policy</h1>
     <p>This policy applies to appointments arranged and paid for through Sahaan Studios. Browsing listings or sending an enquiry is free and does not confirm a booking or create a payment obligation.</p>
     <h2>Before payment</h2>
-    <p>Sahaan shares the treatment scope, appointment window, service address, service and travel charges, agreed extras, applicable taxes and final total before asking you to pay. Your payment confirms a managed booking request. Sahaan then finalises the professional and sends you their details. We will not change the agreed treatment, price or appointment without your consent.</p>
+    <p>Sahaan shares the treatment scope, appointment window, service address, service price including travel within confirmed coverage, agreed extras, applicable taxes and final total before asking you to pay. Travel is not charged again on top of a listed service price. Your payment confirms a managed booking request. Sahaan then finalises the professional and sends you their details. We will not change the agreed treatment, price or appointment without your consent.</p>
     <h2>Cancel or reschedule before service starts</h2>
     <p>Message Sahaan on <a href={sahaanWhatsAppUrl()} target="_blank" rel="noopener noreferrer">WhatsApp at {SAHAAN_WHATSAPP_DISPLAY}</a> with your booking reference. If you cancel before the professional starts the service, you will receive a full refund of the amount you paid. Sahaan charges no cancellation fee or non-refundable deposit during the launch pilot. You may instead request a different time, subject to availability; we will confirm any changed price with you before proceeding.</p>
     <h2>If Sahaan cannot assign a professional</h2>

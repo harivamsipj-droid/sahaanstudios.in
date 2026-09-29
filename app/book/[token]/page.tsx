@@ -109,8 +109,7 @@ export default function ManagedBookingPage() {
           {quote.artistName && <div><dt>Assigned professional</dt><dd>{quote.artistName}</dd></div>}
         </dl>
         <div className="managed-booking-total">
-          <div><span>Service</span><strong>{money(quote.servicePaise)}</strong></div>
-          <div><span>Travel</span><strong>{money(quote.travelPaise)}</strong></div>
+          <div><span>Service including travel</span><strong>{money(quote.servicePaise + quote.travelPaise)}</strong></div>
           {quote.extrasPaise > 0 && <div><span>Agreed extras</span><strong>{money(quote.extrasPaise)}</strong></div>}
           {quote.taxPaise > 0 && <div><span>Applicable taxes</span><strong>{money(quote.taxPaise)}</strong></div>}
           <div className="final"><span>{quote.testMode ? 'Simulated total' : 'Total to pay'}</span><strong>{money(quote.totalPaise)}</strong></div>
