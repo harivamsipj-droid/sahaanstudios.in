@@ -288,6 +288,13 @@ export async function handleManagedBooking(request) {
       const raw = await request.clone().text();
       const expected = createHmac('sha256', liveSecret).update(raw).digest('hex');
       if (safeEqual(expected, request.headers.get('x-razorpay-signature'))) {
+        // Record only the event category, never the payment payload or customer data.
+        let event = 'other';
+        try {
+          const name = JSON.parse(raw)?.event;
+          if (name === 'payment.captured' || name === 'refund.processed') event = name;
+        } catch { /* A valid signature can still cover malformed JSON. */ }
+        console.info(`Sahaan signed live webhook accepted in standby: ${event}`);
         return json({ ok: true, standby: true });
       }
     }
