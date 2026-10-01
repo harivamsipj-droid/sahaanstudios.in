@@ -3859,6 +3859,12 @@ textarea::placeholder {
 .booking-desk > label { max-width:430px; }
 .booking-desk li { display:grid; gap:4px; padding:14px 0; border-bottom:1px solid #ded4c5; }
 .booking-desk li code,.booking-desk-link { overflow-wrap:anywhere; }
+.managed-booking-operations { padding:18px 20px; border-left:4px solid #75532d; background:#f1e6d5; line-height:1.55; }
+.managed-booking-operations strong { display:block; }
+.booking-desk-overdue { color:#9b2920; }
+.booking-desk-manual { padding:14px; background:#f8f5ef; border:1px solid #ded4c5; }
+.booking-desk-manual p { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.5; }
+.booking-desk-manual-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
 @media(max-width:650px) { .booking-desk form { grid-template-columns:1fr; } .booking-desk section { padding:18px; } }
 .launch-price-grid .service-duration { display:flex; align-items:center; gap:7px; color:var(--ink); font-size:13px; font-weight:700; letter-spacing:0; text-transform:none; }
 .launch-price-grid article a { display:flex; align-items:center; gap:6px; margin-top:6px; color:var(--gold-deep); font-size:13px; font-weight:800; text-decoration:underline; text-underline-offset:3px; }

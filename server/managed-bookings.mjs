@@ -2,6 +2,7 @@ import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { isAbsolute } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { standardServicePrices } from '../lib/pricing.mjs';
+import { manualConfirmationDeadline, staffedHoursLabel } from '../lib/manual-booking-window.mjs';
 
 let database;
 let mysqlPool;
@@ -31,9 +32,11 @@ function configured() {
   const testMode = process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
   const liveMode = process.env.SAHAAN_PAYMENT_TEST_MODE !== '1'
     && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_live_')
-    && Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
-    && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
-    && Boolean(process.env.META_TEMPLATE_PAYMENT && process.env.META_TEMPLATE_CUSTOMER_ASSIGNED && process.env.META_TEMPLATE_ARTIST_ASSIGNED);
+    && (manualMode()
+      ? /^\d{4}-\d{2}-\d{2}$/.test(process.env.SAHAAN_MANUAL_PILOT_END || '')
+      : Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
+        && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
+        && Boolean(process.env.META_TEMPLATE_PAYMENT && process.env.META_TEMPLATE_CUSTOMER_ASSIGNED && process.env.META_TEMPLATE_ARTIST_ASSIGNED));
   return process.env.SAHAAN_PAYMENTS_ENABLED === '1'
     && process.env.SAHAAN_POLICY_APPROVED === '1'
     && (testMode || sqliteForTests ? Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
@@ -41,6 +44,18 @@ function configured() {
     && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32)
     && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET)
     && (testMode || liveMode);
+}
+
+function manualMode() {
+  return process.env.SAHAAN_NOTIFICATION_MODE === 'manual';
+}
+
+function manualPilotOpen() {
+  if (testMode() || !manualMode()) return true;
+  const end = process.env.SAHAAN_MANUAL_PILOT_END || '';
+  return /^\d{4}-\d{2}-\d{2}$/.test(end)
+    && Number.isFinite(Date.parse(`${end}T18:29:59.999Z`))
+    && Date.now() <= Date.parse(`${end}T18:29:59.999Z`);
 }
 
 function hasMysqlConfig() {
@@ -82,12 +97,14 @@ async function db() {
         await mysqlPool.query(`CREATE TABLE IF NOT EXISTS managed_notification_outbox (
           id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, quote_id CHAR(36) NOT NULL,
           kind VARCHAR(32) NOT NULL, state VARCHAR(20) NOT NULL DEFAULT 'pending',
-          attempts INT NOT NULL DEFAULT 0, last_error VARCHAR(200),
+          attempts INT NOT NULL DEFAULT 0, last_error VARCHAR(200), sent_at VARCHAR(35),
           created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
           UNIQUE KEY managed_outbox_unique (quote_id,kind),
           INDEX managed_outbox_state (state,id),
           CONSTRAINT managed_outbox_quote FOREIGN KEY (quote_id) REFERENCES managed_quotes(id)
         ) ENGINE=InnoDB`);
+        const [sentColumns] = await mysqlPool.query("SHOW COLUMNS FROM managed_notification_outbox LIKE 'sent_at'");
+        if (!sentColumns.length) await mysqlPool.query('ALTER TABLE managed_notification_outbox ADD COLUMN sent_at VARCHAR(35)');
         await mysqlPool.query("UPDATE managed_notification_outbox SET state='needs_review',last_error='Server restarted during send; verify delivery manually' WHERE state='sending'");
         return {
           prepare(sql) {
@@ -122,9 +139,12 @@ async function db() {
       CREATE TABLE IF NOT EXISTS notification_outbox (
         id INTEGER PRIMARY KEY AUTOINCREMENT, quote_id TEXT NOT NULL, kind TEXT NOT NULL,
         state TEXT NOT NULL DEFAULT 'pending', attempts INTEGER NOT NULL DEFAULT 0,
-        last_error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        last_error TEXT, sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(quote_id, kind)
       );`);
+    if (!database.prepare('PRAGMA table_info(notification_outbox)').all().some((column) => column.name === 'sent_at')) {
+      database.exec('ALTER TABLE notification_outbox ADD COLUMN sent_at TEXT');
+    }
     database.exec("UPDATE notification_outbox SET state='pending' WHERE state='sending'");
   }
   return database;
@@ -171,7 +191,10 @@ function publicQuote(row) {
     extrasPaise: row.extras_paise, taxPaise: row.tax_paise, totalPaise: row.total_paise,
     status: row.status, expiresAt: row.expires_at,
     artistName: row.status === 'assigned' ? row.artist_name : null,
-    testMode: testMode(),
+    testMode: testMode(), manualPilot: manualMode() && !testMode(),
+    confirmationBy: manualMode() && row.paid_at ? manualConfirmationDeadline(row.paid_at) : null,
+    staffedHours: manualMode() ? staffedHoursLabel : null,
+    paymentsOpen: manualPilotOpen(),
   };
 }
 
@@ -193,7 +216,7 @@ async function markPaid(row, paymentId) {
     WHERE id=? AND status IN ('quoted','payment_pending') AND (razorpay_payment_id IS NULL OR razorpay_payment_id=?)`)
     .run(paymentId, new Date().toISOString(), row.id, paymentId);
   const updated = await store.prepare('SELECT * FROM quotes WHERE id=?').get(row.id);
-  if (!testMode() && updated?.razorpay_payment_id === paymentId) {
+  if (!testMode() && !manualMode() && updated?.razorpay_payment_id === paymentId) {
     await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'payment_customer')`).run(row.id);
   }
   return updated;
@@ -215,7 +238,7 @@ async function sendTemplate(to, name, parameters) {
 }
 
 export async function drainBookingNotifications() {
-  if (!configured() || testMode()) return;
+  if (!configured() || testMode() || manualMode()) return;
   const store = await db();
   // Recover an acknowledgement if the process stopped between recording a
   // captured payment and queueing its customer message.
@@ -252,7 +275,7 @@ export async function handleManagedBooking(request) {
   const path = url.pathname.replace('/api/managed-bookings', '');
   if (path === '/health' && request.method === 'GET') {
     if (!configured()) return json({ enabled: false, testMode: false });
-    try { await db(); return json({ enabled: true, testMode: testMode() }); }
+    try { await db(); return json({ enabled: true, testMode: testMode(), manualPilot: manualMode() && !testMode(), paymentsOpen: manualPilotOpen() }); }
     catch { return json({ enabled: false, testMode: testMode() }, 503); }
   }
   if (!configured()) return json({ error: 'Online booking payments are not available yet.' }, 503);
@@ -265,6 +288,7 @@ export async function handleManagedBooking(request) {
     }
     if (path === '/admin/quotes' && request.method === 'POST') {
       if (!adminAllowed(request)) return json({ error: 'Unauthorized' }, 401);
+      if (!manualPilotOpen()) return json({ error: 'The three-month manual pilot has ended. Do not create new payable quotes until the workflow is reviewed.' }, 409);
       const input = await body(request);
       if (input.coverageConfirmed !== true) return json({ error: 'Confirm eligible artist coverage, rate and travel before creating a payable quote' }, 400);
       const row = {
@@ -298,11 +322,28 @@ export async function handleManagedBooking(request) {
     }
     if (path === '/admin/quotes' && request.method === 'GET') {
       if (!adminAllowed(request)) return json({ error: 'Unauthorized' }, 401);
-      const rows = await store.prepare(`SELECT id,customer_name,service,appointment_window,total_paise,status,paid_at,artist_name FROM quotes ORDER BY created_at DESC LIMIT 100`).all();
-      const notifications = await store.prepare(`SELECT quote_id,kind,state,attempts,last_error FROM notification_outbox ORDER BY id DESC LIMIT 300`).all();
-      return json({ quotes: rows, notifications });
+      const rows = await store.prepare(`SELECT id,customer_name,customer_phone,service,scope,service_address,appointment_window,total_paise,status,paid_at,artist_name,artist_phone FROM quotes ORDER BY created_at DESC LIMIT 100`).all();
+      const notifications = await store.prepare(`SELECT quote_id,kind,state,attempts,last_error,sent_at FROM notification_outbox ORDER BY id DESC LIMIT 300`).all();
+      return json({ quotes: rows.map((row) => ({ ...row,
+        confirmation_by: manualMode() && row.paid_at ? manualConfirmationDeadline(row.paid_at) : null,
+      })), notifications });
+    }
+    if (path === '/admin/notifications/manual-sent' && request.method === 'POST') {
+      if (!adminAllowed(request)) return json({ error: 'Unauthorized' }, 401);
+      if (!manualMode() || testMode()) return json({ error: 'Manual confirmation tracking is not active.' }, 409);
+      const input = await body(request);
+      if (!['assigned_customer', 'assigned_artist'].includes(input.kind) || input.sentConfirmed !== true) {
+        return json({ error: 'Confirm the correct WhatsApp message was actually sent before marking it complete.' }, 400);
+      }
+      const row = await store.prepare('SELECT status FROM quotes WHERE id=?').get(input.reference);
+      if (row?.status !== 'assigned') return json({ error: 'This booking has not been assigned.' }, 409);
+      const updated = await store.prepare(`UPDATE notification_outbox SET state='manual_sent',sent_at=?,last_error=NULL
+        WHERE quote_id=? AND kind=? AND state='manual_pending'`)
+        .run(new Date().toISOString(), input.reference, input.kind);
+      return updated.changes ? json({ status: 'manual_sent' }) : json({ error: 'Message is not pending or was already marked sent.' }, 409);
     }
     if (path === '/order' && request.method === 'POST') {
+      if (!manualPilotOpen()) return json({ error: 'This pilot is not accepting new payments. Please contact Sahaan.' }, 409);
       const input = await body(request);
       if (input.consent !== true) return json({ error: testMode() ? 'Please approve this simulated test transaction.' : 'Please approve the quote and WhatsApp booking updates.' }, 400);
       const row = await store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
@@ -331,7 +372,8 @@ export async function handleManagedBooking(request) {
       }
       const updated = await markPaid(row, input.paymentId);
       await drainBookingNotifications();
-      return json({ status: updated.status, reference: row.id });
+      return json({ status: updated.status, reference: row.id,
+        confirmationBy: manualMode() ? manualConfirmationDeadline(updated.paid_at) : null });
     }
     if (path === '/webhook' && request.method === 'POST') {
       const raw = await request.text();
@@ -368,8 +410,13 @@ export async function handleManagedBooking(request) {
         .run(artistName,artistPhone,now,now,input.reference);
       if (!updated.changes) return json({ error: 'Only a paid, unassigned request can be assigned' }, 409);
       if (!testMode()) {
-        await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
-        await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
+        if (manualMode()) {
+          await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind,state) VALUES(?,'assigned_customer','manual_pending')`).run(input.reference);
+          await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind,state) VALUES(?,'assigned_artist','manual_pending')`).run(input.reference);
+        } else {
+          await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_customer')`).run(input.reference);
+          await store.prepare(`INSERT OR IGNORE INTO notification_outbox(quote_id,kind) VALUES(?,'assigned_artist')`).run(input.reference);
+        }
       }
       await drainBookingNotifications();
       return json({ status: 'assigned' });

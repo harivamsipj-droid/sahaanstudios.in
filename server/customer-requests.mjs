@@ -23,7 +23,8 @@ function hasMysqlConfig() {
 }
 
 export function customerWhatsappReady() {
-  return process.env.SAHAAN_WHATSAPP_REQUESTS_ENABLED === '1'
+  return process.env.SAHAAN_NOTIFICATION_MODE !== 'manual'
+    && process.env.SAHAAN_WHATSAPP_REQUESTS_ENABLED === '1'
     && Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
     && /^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
     && Boolean(process.env.META_TEMPLATE_REQUEST_RECEIVED);

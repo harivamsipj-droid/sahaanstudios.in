@@ -4,6 +4,7 @@ import { rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { manualConfirmationDeadline } from '../lib/manual-booking-window.mjs';
 
 const databaseFile = join(tmpdir(), `sahaan-payment-test-${randomUUID()}.sqlite`);
 process.env.NODE_ENV = 'test';
@@ -138,7 +139,7 @@ test('test mode accepts only fictional bookings and sends no WhatsApp messages',
     throw new Error(`Test mode must not call ${target}`);
   };
   try {
-    assert.deepEqual((await call('/health')).data, { enabled: true, testMode: true });
+    assert.deepEqual((await call('/health')).data, { enabled: true, testMode: true, manualPilot: false, paymentsOpen: true });
     const details = {
       customerName: 'TEST Customer', customerPhone: '919999999999', service: 'Gel polish',
       scope: 'Synthetic test', serviceAddress: 'TEST address, Hyderabad',
@@ -168,4 +169,84 @@ test('test mode accepts only fictional bookings and sends no WhatsApp messages',
     globalThis.fetch = previousFetch;
     for (const suffix of ['', '-wal', '-shm']) rmSync(`${testFile}${suffix}`, { force: true });
   }
+});
+
+test('manual pilot tracks human WhatsApp confirmations without calling Meta', async () => {
+  const manualFile = join(tmpdir(), `sahaan-manual-pilot-${randomUUID()}.sqlite`);
+  const previousFetch = globalThis.fetch;
+  Object.assign(process.env, {
+    SAHAAN_PAYMENT_TEST_MODE: '0', SAHAAN_NOTIFICATION_MODE: 'manual', SAHAAN_MANUAL_PILOT_END: '2099-12-31',
+    SAHAAN_DATA_FILE: manualFile, RAZORPAY_KEY_ID: 'rzp_live_example',
+  });
+  let amount = 0;
+  globalThis.fetch = async (url, options = {}) => {
+    const target = typeof url === 'string' ? url : url instanceof URL ? url.href : url.url;
+    if (target.endsWith('/v1/orders')) {
+      amount = JSON.parse(options.body).amount;
+      return new Response(JSON.stringify({ id: 'order_manual123' }), { status: 200 });
+    }
+    if (target.endsWith('/v1/payments/pay_manual123')) {
+      return new Response(JSON.stringify({ id: 'pay_manual123', status: 'captured',
+        order_id: 'order_manual123', amount, currency: 'INR' }), { status: 200 });
+    }
+    throw new Error(`Manual pilot must not call ${target}`);
+  };
+  try {
+    const health = await call('/health');
+    assert.equal(health.data.manualPilot, true);
+    assert.equal(health.data.paymentsOpen, true);
+    const details = {
+      customerName: 'Pilot Customer', customerPhone: '919876543210', service: 'Gel polish',
+      scope: 'Gel polish on natural nails', serviceAddress: 'Hyderabad appointment address',
+      appointmentWindow: '2 October, 2–4 pm', servicePaise: 49900, travelPaise: 10000,
+      extrasPaise: 0, taxPaise: 0, coverageConfirmed: true,
+    };
+    const created = await call('/admin/quotes', 'POST', details, true);
+    assert.equal(created.code, 201);
+    const token = new URL(created.data.checkoutUrl).pathname.split('/').pop();
+    const quote = await call(`/quote?token=${token}`);
+    assert.equal(quote.data.manualPilot, true);
+    const order = await call('/order', 'POST', { token, consent: true });
+    assert.equal(order.code, 200);
+    const signature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update('order_manual123|pay_manual123').digest('hex');
+    const verified = await call('/verify', 'POST', { token, orderId: 'order_manual123',
+      paymentId: 'pay_manual123', signature });
+    assert.equal(verified.data.status, 'paid_unassigned');
+    assert.ok(verified.data.confirmationBy);
+    assert.equal((await call('/admin/quotes', 'GET', undefined, true)).data.notifications.length, 0);
+    const assignment = await call('/admin/assign', 'POST', { reference: created.data.reference,
+      artistName: 'Pilot Artist', artistPhone: '919876543211', artistConsented: true }, true);
+    assert.equal(assignment.data.status, 'assigned');
+    let admin = await call('/admin/quotes', 'GET', undefined, true);
+    assert.equal(admin.data.notifications.length, 2);
+    assert.ok(admin.data.notifications.every((notice) => notice.state === 'manual_pending'));
+    assert.equal((await call('/admin/notifications/manual-sent', 'POST', {
+      reference: created.data.reference, kind: 'assigned_customer', sentConfirmed: false,
+    }, true)).code, 400);
+    assert.equal((await call('/admin/notifications/manual-sent', 'POST', {
+      reference: created.data.reference, kind: 'assigned_customer', sentConfirmed: true,
+    }, true)).code, 200);
+    assert.equal((await call('/admin/notifications/manual-sent', 'POST', {
+      reference: created.data.reference, kind: 'assigned_customer', sentConfirmed: true,
+    }, true)).code, 409);
+    admin = await call('/admin/quotes', 'GET', undefined, true);
+    assert.equal(admin.data.notifications.find((notice) => notice.kind === 'assigned_customer').state, 'manual_sent');
+    assert.ok(admin.data.notifications.find((notice) => notice.kind === 'assigned_customer').sent_at);
+    process.env.SAHAAN_MANUAL_PILOT_END = '2020-01-01';
+    assert.equal((await call('/health')).data.paymentsOpen, false);
+    assert.equal((await call('/admin/quotes', 'POST', details, true)).code, 409);
+    assert.equal((await call('/order', 'POST', { token, consent: true })).code, 409);
+    assert.equal((await call('/admin/quotes', 'GET', undefined, true)).code, 200);
+  } finally {
+    closeManagedBookingStorage();
+    globalThis.fetch = previousFetch;
+    for (const suffix of ['', '-wal', '-shm']) rmSync(`${manualFile}${suffix}`, { force: true });
+  }
+});
+
+test('two staffed hours pause at 11 pm IST and resume at 10 am', () => {
+  assert.equal(manualConfirmationDeadline('2026-10-01T15:00:00.000Z'), '2026-10-01T17:00:00.000Z');
+  assert.equal(manualConfirmationDeadline('2026-10-01T17:00:00.000Z'), '2026-10-02T06:00:00.000Z');
+  assert.equal(manualConfirmationDeadline('2026-10-01T19:00:00.000Z'), '2026-10-02T06:30:00.000Z');
 });

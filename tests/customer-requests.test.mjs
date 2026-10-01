@@ -85,3 +85,31 @@ test('only a separately opted-in enquiry queues one approved WhatsApp template',
     for (const suffix of ['', '-wal', '-shm']) rmSync(`${file}${suffix}`, { force: true });
   }
 });
+
+test('manual pilot never sends an automatic enquiry message', async () => {
+  const manualFile = join(tmpdir(), `sahaan-manual-enquiry-${randomUUID()}.sqlite`);
+  const previousFetch = globalThis.fetch;
+  Object.assign(process.env, {
+    SAHAAN_INQUIRY_DATA_FILE: manualFile, SAHAAN_NOTIFICATION_MODE: 'manual',
+    SAHAAN_WHATSAPP_REQUESTS_ENABLED: '1', META_WHATSAPP_TOKEN: 'test-token',
+    META_WHATSAPP_PHONE_NUMBER_ID: '12345', META_GRAPH_VERSION: 'v23.0',
+    META_TEMPLATE_REQUEST_RECEIVED: 'sahaan_request_received',
+  });
+  globalThis.fetch = async () => { throw new Error('Manual pilot must not send WhatsApp'); };
+  try {
+    const health = await (await handleCustomerRequest(request('health'))).json();
+    assert.equal(health.whatsappAvailable, false);
+    const saved = await (await handleCustomerRequest(request('', 'POST', {
+      ...details, name: 'Manual pilot client', whatsappConsent: true,
+    }))).json();
+    assert.equal(saved.whatsappUpdate, 'not_queued');
+    await drainCustomerRequestNotifications();
+  } finally {
+    globalThis.fetch = previousFetch;
+    for (const key of ['SAHAAN_NOTIFICATION_MODE', 'SAHAAN_WHATSAPP_REQUESTS_ENABLED',
+      'META_WHATSAPP_TOKEN', 'META_WHATSAPP_PHONE_NUMBER_ID', 'META_GRAPH_VERSION',
+      'META_TEMPLATE_REQUEST_RECEIVED']) delete process.env[key];
+    closeCustomerRequestStorage();
+    for (const suffix of ['', '-wal', '-shm']) rmSync(`${manualFile}${suffix}`, { force: true });
+  }
+});

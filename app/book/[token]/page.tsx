@@ -8,6 +8,7 @@ type Quote = {
   serviceAddress: string; appointmentWindow: string; servicePaise: number;
   travelPaise: number; extrasPaise: number; taxPaise: number; totalPaise: number;
   status: string; expiresAt: string; artistName: string | null; testMode: boolean;
+  manualPilot: boolean; staffedHours: string | null; confirmationBy: string | null; paymentsOpen: boolean;
 };
 
 type RazorpayResult = { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string };
@@ -70,14 +71,15 @@ export default function ManagedBookingPage() {
               body: JSON.stringify({ token, orderId: payment.razorpay_order_id,
                 paymentId: payment.razorpay_payment_id, signature: payment.razorpay_signature }),
             });
-            const result = await verifyResponse.json() as { status: string; error?: string };
+            const result = await verifyResponse.json() as { status: string; confirmationBy?: string | null; error?: string };
             if (verifyResponse.status === 202) {
               setVerificationPending(true);
               setError('Your bank response is being verified. Please do not pay again. Contact Sahaan with this reference if it stays pending.');
             } else if (!verifyResponse.ok) {
               throw new Error(result.error || 'Payment verification pending');
             } else {
-              setQuote((current) => current ? { ...current, status: result.status } : current);
+              setQuote((current) => current ? { ...current, status: result.status,
+                confirmationBy: result.confirmationBy || null } : current);
             }
           } catch (reason) {
             setVerificationPending(true);
@@ -115,11 +117,11 @@ export default function ManagedBookingPage() {
           <div className="final"><span>{quote.testMode ? 'Simulated total' : 'Total to pay'}</span><strong>{money(quote.totalPaise)}</strong></div>
         </div>
         {['quoted', 'payment_pending'].includes(quote.status) ? <>
-          <p className="managed-booking-notice">{quote.testMode ? 'This simulated transaction checks the payment connection only. It does not reserve a professional or charge real money.' : <>Sahaan will finalise the professional <strong>after payment</strong>. Payment confirms a managed request, not a named artist or a completed service. If Sahaan cannot arrange the agreed appointment, you may choose a replacement or a full refund.</>}</p>
+          <p className="managed-booking-notice">{quote.testMode ? 'This simulated transaction checks the payment connection only. It does not reserve a professional or charge real money.' : quote.manualPilot ? <>Sahaan will review your paid request and <strong>manually message you on WhatsApp within two staffed hours</strong> ({quote.staffedHours}). We will either confirm your professional and appointment, or offer another time or a full refund if the agreed service is unavailable. Payment alone does not reserve an artist.</> : <>Sahaan will finalise the professional <strong>after payment</strong>. Payment confirms a managed request, not a named artist or a completed service. If Sahaan cannot arrange the agreed appointment, you may choose a replacement or a full refund.</>}</p>
           <label className="managed-booking-consent"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} /><span>{quote.testMode ? 'I understand this is a simulated payment with no real appointment or WhatsApp notification.' : <>I approve this total and agree to receive booking updates on WhatsApp. I understand the <Link href="/cancellation-refunds" target="_blank">cancellation and refund policy</Link> and <Link href="/terms" target="_blank">terms</Link>.</>}</span></label>
-          <button type="button" disabled={!accepted || busy || verificationPending || new Date(quote.expiresAt) < new Date()} onClick={pay}>{verificationPending ? 'Payment verification pending' : busy ? 'Opening secure checkout…' : quote.testMode ? `Run simulated payment · ${money(quote.totalPaise)}` : `Pay ${money(quote.totalPaise)} securely`}</button>
+          <button type="button" disabled={!quote.paymentsOpen || !accepted || busy || verificationPending || new Date(quote.expiresAt) < new Date()} onClick={pay}>{!quote.paymentsOpen ? 'Pilot payments temporarily paused' : verificationPending ? 'Payment verification pending' : busy ? 'Opening secure checkout…' : quote.testMode ? `Run simulated payment · ${money(quote.totalPaise)}` : `Pay ${money(quote.totalPaise)} securely`}</button>
           <small>Quote expires {new Date(quote.expiresAt).toLocaleString('en-IN')}. {quote.testMode ? 'Use Razorpay test payment details only; do not use a real card.' : 'Payment is handled by Razorpay; Sahaan never sees your card PIN or OTP.'}</small>
-        </> : <p className="managed-booking-notice">{quote.testMode ? 'The test transaction was recorded. It is not a customer booking, and no WhatsApp update was sent.' : quote.status === 'refunded' ? 'The full refund has been processed to your original payment method. Bank credit timing may vary.' : quote.status === 'assigned' ? 'Sahaan has assigned your professional. Please check your WhatsApp booking update.' : 'Sahaan has received your payment and will confirm the professional on WhatsApp. Please do not pay again.'}</p>}
+        </> : <p className="managed-booking-notice">{quote.testMode ? 'The test transaction was recorded. It is not a customer booking, and no WhatsApp update was sent.' : quote.status === 'refunded' ? 'The full refund has been processed to your original payment method. Bank credit timing may vary.' : quote.status === 'assigned' ? quote.manualPilot ? 'Sahaan has assigned your professional. Our team will send the appointment details manually through WhatsApp; if you have not received them by the time below, please message us.' : 'Sahaan has assigned your professional. Please check your WhatsApp booking update.' : quote.manualPilot ? 'Sahaan has received your payment. Our team will review your appointment and message you manually on WhatsApp; please do not pay again.' : 'Sahaan has received your payment and will confirm the professional on WhatsApp. Please do not pay again.'}{quote.manualPilot && quote.confirmationBy && quote.status !== 'refunded' && <> We will confirm the appointment or contact you about an alternative/full refund by <strong>{new Date(quote.confirmationBy).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })} IST</strong>.</>}</p>}
       </>}
       <a className="managed-booking-help" href="https://wa.me/918143072723" target="_blank" rel="noopener noreferrer">Questions? Message Sahaan on WhatsApp</a>
     </section>
