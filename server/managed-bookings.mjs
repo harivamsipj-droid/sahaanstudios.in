@@ -42,7 +42,9 @@ function configured() {
     && (testMode || sqliteForTests ? Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
       : hasMysqlConfig())
     && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32)
-    && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_WEBHOOK_SECRET)
+    && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
+    && (testMode ? Boolean(process.env.RAZORPAY_WEBHOOK_SECRET)
+      : Boolean((process.env.RAZORPAY_LIVE_WEBHOOK_SECRET || '').length >= 32))
     && (testMode || liveMode);
 }
 
@@ -278,6 +280,18 @@ export async function handleManagedBooking(request) {
     try { await db(); return json({ enabled: true, testMode: testMode(), manualPilot: manualMode() && !testMode(), paymentsOpen: manualPilotOpen() }); }
     catch { return json({ enabled: false, testMode: testMode() }, 503); }
   }
+  // A signed live webhook can be connected before checkout goes live. While
+  // test payments are active, acknowledge it without touching test bookings.
+  if (path === '/webhook' && request.method === 'POST' && (!configured() || testMode())) {
+    const liveSecret = process.env.RAZORPAY_LIVE_WEBHOOK_SECRET || '';
+    if (liveSecret.length >= 32) {
+      const raw = await request.clone().text();
+      const expected = createHmac('sha256', liveSecret).update(raw).digest('hex');
+      if (safeEqual(expected, request.headers.get('x-razorpay-signature'))) {
+        return json({ ok: true, standby: true });
+      }
+    }
+  }
   if (!configured()) return json({ error: 'Online booking payments are not available yet.' }, 503);
   if (request.method !== 'GET' && !sameOrigin(request) && path !== '/webhook') return json({ error: 'Origin not allowed' }, 403);
   try {
@@ -377,7 +391,8 @@ export async function handleManagedBooking(request) {
     }
     if (path === '/webhook' && request.method === 'POST') {
       const raw = await request.text();
-      const expected = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
+      const activeSecret = testMode() ? process.env.RAZORPAY_WEBHOOK_SECRET : process.env.RAZORPAY_LIVE_WEBHOOK_SECRET;
+      const expected = createHmac('sha256', activeSecret).update(raw).digest('hex');
       if (!safeEqual(expected, request.headers.get('x-razorpay-signature'))) return json({ error: 'Invalid signature' }, 401);
       const event = JSON.parse(raw);
       if (event.event === 'payment.captured') {

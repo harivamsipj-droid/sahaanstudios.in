@@ -13,6 +13,7 @@ Object.assign(process.env, {
   SAHAAN_DATA_FILE: databaseFile, SAHAAN_ADMIN_TOKEN: 'test_admin_token_longer_than_32_characters',
   RAZORPAY_KEY_ID: 'rzp_live_example', RAZORPAY_KEY_SECRET: 'test_razorpay_secret',
   RAZORPAY_WEBHOOK_SECRET: 'test_webhook_secret',
+  RAZORPAY_LIVE_WEBHOOK_SECRET: 'live_webhook_secret_longer_than_32_chars',
   META_WHATSAPP_TOKEN: 'test_meta_token', META_WHATSAPP_PHONE_NUMBER_ID: '123456789',
   META_GRAPH_VERSION: 'v99.0', META_TEMPLATE_PAYMENT: 'payment_test',
   META_TEMPLATE_CUSTOMER_ASSIGNED: 'customer_test', META_TEMPLATE_ARTIST_ASSIGNED: 'artist_test',
@@ -98,14 +99,16 @@ test('managed payment is captured before artist assignment and handles duplicate
       id: 'pay_test123', status: 'captured', order_id: issuedOrder, amount: 59900, currency: 'INR',
     } } } };
     const raw = JSON.stringify(webhook);
-    const webhookSignature = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
+    const webhookSignature = createHmac('sha256', process.env.RAZORPAY_LIVE_WEBHOOK_SECRET).update(raw).digest('hex');
+    const testWebhookSignature = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
     assert.equal((await call('/webhook', 'POST', webhook, false, 'wrong')).code, 401);
+    assert.equal((await call('/webhook', 'POST', webhook, false, testWebhookSignature)).code, 401);
     assert.equal((await call('/webhook', 'POST', webhook, false, webhookSignature)).code, 200);
     assert.equal(messages.length, 3);
     const refund = { event: 'refund.processed', payload: { refund: { entity: {
       payment_id: 'pay_test123', status: 'processed', amount: 59900,
     } } } };
-    const refundSignature = createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
+    const refundSignature = createHmac('sha256', process.env.RAZORPAY_LIVE_WEBHOOK_SECRET)
       .update(JSON.stringify(refund)).digest('hex');
     assert.equal((await call('/webhook', 'POST', refund, false, refundSignature)).code, 200);
     assert.equal((await call(`/quote?token=${token}`)).data.status, 'refunded');
@@ -140,6 +143,11 @@ test('test mode accepts only fictional bookings and sends no WhatsApp messages',
   };
   try {
     assert.deepEqual((await call('/health')).data, { enabled: true, testMode: true, manualPilot: false, paymentsOpen: true });
+    const standby = { event: 'payment.captured', payload: { payment: { entity: { id: 'pay_live_unmatched' } } } };
+    const standbySignature = createHmac('sha256', process.env.RAZORPAY_LIVE_WEBHOOK_SECRET)
+      .update(JSON.stringify(standby)).digest('hex');
+    assert.deepEqual((await call('/webhook', 'POST', standby, false, standbySignature)).data,
+      { ok: true, standby: true });
     const details = {
       customerName: 'TEST Customer', customerPhone: '919999999999', service: 'Gel polish',
       scope: 'Synthetic test', serviceAddress: 'TEST address, Hyderabad',
