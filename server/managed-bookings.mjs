@@ -29,9 +29,10 @@ const json = (value, status = 200) => new Response(JSON.stringify(value), {
 });
 
 function configured() {
-  const testMode = process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
+  const credentials = razorpayCredentials();
+  const testMode = process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && credentials.id.startsWith('rzp_test_');
   const liveMode = process.env.SAHAAN_PAYMENT_TEST_MODE !== '1'
-    && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_live_')
+    && credentials.id.startsWith('rzp_live_')
     && (manualMode()
       ? /^\d{4}-\d{2}-\d{2}$/.test(process.env.SAHAAN_MANUAL_PILOT_END || '')
       : Boolean(process.env.META_WHATSAPP_TOKEN && process.env.META_WHATSAPP_PHONE_NUMBER_ID)
@@ -42,7 +43,7 @@ function configured() {
     && (testMode || sqliteForTests ? Boolean(process.env.SAHAAN_DATA_FILE && isAbsolute(process.env.SAHAAN_DATA_FILE))
       : hasMysqlConfig())
     && Boolean(process.env.SAHAAN_ADMIN_TOKEN && process.env.SAHAAN_ADMIN_TOKEN.length >= 32)
-    && Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
+    && Boolean(credentials.id && credentials.secret)
     && (testMode ? Boolean(process.env.RAZORPAY_WEBHOOK_SECRET)
       : Boolean((process.env.RAZORPAY_LIVE_WEBHOOK_SECRET || '').length >= 32))
     && (testMode || liveMode);
@@ -67,6 +68,13 @@ function hasMysqlConfig() {
 
 function testMode() {
   return process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
+}
+
+function razorpayCredentials() {
+  // Never fall back to test credentials after the live switch is selected.
+  return process.env.SAHAAN_PAYMENT_TEST_MODE === '1'
+    ? { id: process.env.RAZORPAY_KEY_ID || '', secret: process.env.RAZORPAY_KEY_SECRET || '' }
+    : { id: process.env.RAZORPAY_LIVE_KEY_ID || '', secret: process.env.RAZORPAY_LIVE_KEY_SECRET || '' };
 }
 
 async function db() {
@@ -201,7 +209,8 @@ function publicQuote(row) {
 }
 
 async function razorpay(path, options = {}) {
-  const auth = Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString('base64');
+  const { id, secret } = razorpayCredentials();
+  const auth = Buffer.from(`${id}:${secret}`).toString('base64');
   const response = await fetch(`https://api.razorpay.com/v1/${path}`, {
     ...options,
     headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json', ...options.headers },
@@ -379,13 +388,13 @@ export async function handleManagedBooking(request) {
         await store.prepare(`UPDATE quotes SET razorpay_order_id=?,status='payment_pending' WHERE id=? AND razorpay_order_id IS NULL`).run(order.id, row.id);
         orderId = (await store.prepare('SELECT razorpay_order_id FROM quotes WHERE id=?').get(row.id)).razorpay_order_id;
       }
-      return json({ keyId: process.env.RAZORPAY_KEY_ID, orderId, amount: row.total_paise, currency: 'INR' });
+      return json({ keyId: razorpayCredentials().id, orderId, amount: row.total_paise, currency: 'INR' });
     }
     if (path === '/verify' && request.method === 'POST') {
       const input = await body(request);
       const row = await store.prepare('SELECT * FROM quotes WHERE token=?').get(input.token);
       if (!row || row.razorpay_order_id !== input.orderId || !/^pay_[A-Za-z0-9]+$/.test(input.paymentId || '')) return json({ error: 'Payment details do not match the quote' }, 400);
-      const expected = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(`${row.razorpay_order_id}|${input.paymentId}`).digest('hex');
+      const expected = createHmac('sha256', razorpayCredentials().secret).update(`${row.razorpay_order_id}|${input.paymentId}`).digest('hex');
       if (!safeEqual(expected, input.signature)) return json({ error: 'Payment signature invalid' }, 400);
       const payment = await razorpay(`payments/${encodeURIComponent(input.paymentId)}`);
       if (payment.status !== 'captured' || payment.order_id !== row.razorpay_order_id || payment.amount !== row.total_paise || payment.currency !== 'INR') {

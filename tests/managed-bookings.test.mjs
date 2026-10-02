@@ -11,7 +11,8 @@ process.env.NODE_ENV = 'test';
 Object.assign(process.env, {
   SAHAAN_PAYMENTS_ENABLED: '1', SAHAAN_POLICY_APPROVED: '1',
   SAHAAN_DATA_FILE: databaseFile, SAHAAN_ADMIN_TOKEN: 'test_admin_token_longer_than_32_characters',
-  RAZORPAY_KEY_ID: 'rzp_live_example', RAZORPAY_KEY_SECRET: 'test_razorpay_secret',
+  RAZORPAY_KEY_ID: 'rzp_test_example', RAZORPAY_KEY_SECRET: 'test_razorpay_secret',
+  RAZORPAY_LIVE_KEY_ID: 'rzp_live_example', RAZORPAY_LIVE_KEY_SECRET: 'live_razorpay_secret',
   RAZORPAY_WEBHOOK_SECRET: 'test_webhook_secret',
   RAZORPAY_LIVE_WEBHOOK_SECRET: 'live_webhook_secret_longer_than_32_chars',
   META_WHATSAPP_TOKEN: 'test_meta_token', META_WHATSAPP_PHONE_NUMBER_ID: '123456789',
@@ -29,6 +30,8 @@ let issueAmount = 0;
 globalThis.fetch = async (url, options = {}) => {
   const target = typeof url === 'string' ? url : url instanceof URL ? url.href : url.url;
   if (target.endsWith('/v1/orders') && options.method === 'POST') {
+    assert.equal(options.headers.authorization,
+      `Basic ${Buffer.from('rzp_live_example:live_razorpay_secret').toString('base64')}`);
     const order = JSON.parse(options.body);
     issueAmount = order.amount;
     issuedOrder = 'order_test123';
@@ -80,10 +83,11 @@ test('managed payment is captured before artist assignment and handles duplicate
     assert.equal((await call('/order', 'POST', { token, consent: false })).code, 400);
     const order = await call('/order', 'POST', { token, consent: true });
     assert.equal(order.data.amount, 59900);
+    assert.equal(order.data.keyId, process.env.RAZORPAY_LIVE_KEY_ID);
     assert.equal(order.data.orderId, issuedOrder);
     assert.equal((await call('/verify', 'POST', { token, orderId: issuedOrder,
       paymentId: 'pay_test123', signature: 'wrong' })).code, 400);
-    const signature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+    const signature = createHmac('sha256', process.env.RAZORPAY_LIVE_KEY_SECRET)
       .update(`${issuedOrder}|pay_test123`).digest('hex');
     const verified = await call('/verify', 'POST', { token, orderId: issuedOrder,
       paymentId: 'pay_test123', signature });
@@ -184,7 +188,7 @@ test('manual pilot tracks human WhatsApp confirmations without calling Meta', as
   const previousFetch = globalThis.fetch;
   Object.assign(process.env, {
     SAHAAN_PAYMENT_TEST_MODE: '0', SAHAAN_NOTIFICATION_MODE: 'manual', SAHAAN_MANUAL_PILOT_END: '2099-12-31',
-    SAHAAN_DATA_FILE: manualFile, RAZORPAY_KEY_ID: 'rzp_live_example',
+    SAHAAN_DATA_FILE: manualFile, RAZORPAY_KEY_ID: 'rzp_test_example',
   });
   let amount = 0;
   globalThis.fetch = async (url, options = {}) => {
@@ -216,7 +220,8 @@ test('manual pilot tracks human WhatsApp confirmations without calling Meta', as
     assert.equal(quote.data.manualPilot, true);
     const order = await call('/order', 'POST', { token, consent: true });
     assert.equal(order.code, 200);
-    const signature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+    assert.equal(order.data.keyId, process.env.RAZORPAY_LIVE_KEY_ID);
+    const signature = createHmac('sha256', process.env.RAZORPAY_LIVE_KEY_SECRET)
       .update('order_manual123|pay_manual123').digest('hex');
     const verified = await call('/verify', 'POST', { token, orderId: 'order_manual123',
       paymentId: 'pay_manual123', signature });
@@ -257,4 +262,16 @@ test('two staffed hours pause at 11 pm IST and resume at 10 am', () => {
   assert.equal(manualConfirmationDeadline('2026-10-01T15:00:00.000Z'), '2026-10-01T17:00:00.000Z');
   assert.equal(manualConfirmationDeadline('2026-10-01T17:00:00.000Z'), '2026-10-02T06:00:00.000Z');
   assert.equal(manualConfirmationDeadline('2026-10-01T19:00:00.000Z'), '2026-10-02T06:30:00.000Z');
+});
+
+test('live mode fails closed when the separate live key pair is incomplete', async () => {
+  const liveSecret = process.env.RAZORPAY_LIVE_KEY_SECRET;
+  try {
+    process.env.SAHAAN_PAYMENT_TEST_MODE = '0';
+    process.env.RAZORPAY_KEY_ID = 'rzp_live_legacy_key_must_not_be_used';
+    delete process.env.RAZORPAY_LIVE_KEY_SECRET;
+    assert.deepEqual((await call('/health')).data, { enabled: false, testMode: false });
+  } finally {
+    process.env.RAZORPAY_LIVE_KEY_SECRET = liveSecret;
+  }
 });
