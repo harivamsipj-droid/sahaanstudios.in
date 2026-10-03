@@ -47,6 +47,13 @@ export default function BookingDeskPage() {
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not load bookings'); }
   }
 
+  async function checkStorage() {
+    try {
+      const data = await api<{ storage: string; paymentsEnabled: boolean; error?: string }>('/admin/storage-check');
+      setMessage(data.storage === 'ready' ? 'Booking database read/write check passed. The probe was rolled back; no quote was created.' : 'Booking database check did not pass.');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not check booking storage'); }
+  }
+
   async function create(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault(); setMessage('');
     try {
@@ -106,6 +113,7 @@ export default function BookingDeskPage() {
     {manualPilot && !paymentsOpen && <p className="managed-booking-test"><strong>Pilot end date reached.</strong> New quotes and payments are off; continue resolving existing paid requests and review the workflow before reopening.</p>}
     <label>Admin access token<input type="password" autoComplete="off" value={token} onChange={(event) => setToken(event.target.value)} /></label>
     <button type="button" onClick={refresh} disabled={!token}>Load requests</button>
+    <button type="button" onClick={checkStorage} disabled={!token}>Check booking storage</button>
     {message && <output>{message}</output>}
     <section><h2>{mode === 'test' ? 'Create a simulated test quote' : 'Create a final customer quote'}</h2><p>{mode === 'test' ? 'Use fictional details only. This quote tests the checkout and must not be shared with a customer.' : 'For a listed service, the service component plus travel allocation must equal Sahaan’s published price: ₹599 gel polish, ₹999 manicure or ₹1,399 extensions. Travel is included, not added on top. Check artist coverage and obtain approval for any optional extras before sharing a payment link.'}</p>
       <form onSubmit={create}>

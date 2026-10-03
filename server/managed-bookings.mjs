@@ -66,6 +66,35 @@ function hasMysqlConfig() {
     .every((name) => Boolean(process.env[name]));
 }
 
+async function checkMysqlStorage() {
+  const { createConnection } = await import('mysql2/promise');
+  const connection = await createConnection({
+    host: process.env.SAHAAN_MYSQL_HOST,
+    user: process.env.SAHAAN_MYSQL_USER,
+    password: process.env.SAHAAN_MYSQL_PASSWORD,
+    database: process.env.SAHAAN_MYSQL_DATABASE,
+    timezone: 'Z',
+    connectTimeout: 8000,
+  });
+  try {
+    await connection.beginTransaction();
+    const id = randomUUID();
+    const token = randomBytes(32).toString('hex');
+    const now = new Date().toISOString();
+    const expires = new Date(Date.now() + 60_000).toISOString();
+    await connection.execute(`INSERT INTO managed_quotes
+      (id,token,customer_name,customer_phone,service,scope,service_address,appointment_window,
+       service_paise,travel_paise,extras_paise,tax_paise,total_paise,status,created_at,expires_at)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [id,token,'TEST Storage Probe','919999999999','Internal storage check','No service or payment',
+      'TEST Internal only','TEST Internal only',100,0,0,0,100,'internal_probe',now,expires]);
+    const [rows] = await connection.execute('SELECT status FROM managed_quotes WHERE id=?', [id]);
+    if (rows[0]?.status !== 'internal_probe') throw new Error('Booking storage readback failed');
+  } finally {
+    try { await connection.rollback(); } finally { await connection.end(); }
+  }
+}
+
 function testMode() {
   return process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
 }
@@ -284,6 +313,22 @@ export async function drainBookingNotifications() {
 export async function handleManagedBooking(request) {
   const url = new URL(request.url);
   const path = url.pathname.replace('/api/managed-bookings', '');
+  if (path === '/admin/storage-check' && request.method === 'GET') {
+    const adminToken = process.env.SAHAAN_ADMIN_TOKEN || '';
+    if (adminToken.length < 32 || !safeEqual(request.headers.get('authorization'), `Bearer ${adminToken}`)) {
+      return json({ error: 'Unauthorized' }, 401);
+    }
+    if (!sameOrigin(request)) return json({ error: 'Origin not allowed' }, 403);
+    if (!hasMysqlConfig()) return json({ error: 'Booking database settings are incomplete.' }, 503);
+    try {
+      await checkMysqlStorage();
+      return json({ storage: 'ready', paymentsEnabled: process.env.SAHAAN_PAYMENTS_ENABLED === '1' });
+    } catch (error) {
+      const code = typeof error?.code === 'string' && /^[A-Z0-9_]+$/.test(error.code) ? error.code : 'UNKNOWN';
+      console.error('Booking storage check failed:', code);
+      return json({ error: `Booking database check failed (${code}).` }, 503);
+    }
+  }
   if (path === '/health' && request.method === 'GET') {
     if (!configured()) return json({ enabled: false, testMode: false });
     try { await db(); return json({ enabled: true, testMode: testMode(), manualPilot: manualMode() && !testMode(), paymentsOpen: manualPilotOpen() }); }

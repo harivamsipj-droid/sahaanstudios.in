@@ -275,3 +275,16 @@ test('live mode fails closed when the separate live key pair is incomplete', asy
     process.env.RAZORPAY_LIVE_KEY_SECRET = liveSecret;
   }
 });
+
+test('storage check is private and remains available while payments are off', async () => {
+  const enabled = process.env.SAHAAN_PAYMENTS_ENABLED;
+  try {
+    process.env.SAHAAN_PAYMENTS_ENABLED = '0';
+    assert.equal((await call('/admin/storage-check')).code, 401);
+    const response = await call('/admin/storage-check', 'GET', undefined, true);
+    assert.equal(response.code, 503);
+    assert.equal(response.data.error, 'Booking database settings are incomplete.');
+  } finally {
+    process.env.SAHAAN_PAYMENTS_ENABLED = enabled;
+  }
+});
