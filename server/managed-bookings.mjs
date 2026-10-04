@@ -125,8 +125,8 @@ function razorpayCredentials() {
     : { id: process.env.RAZORPAY_LIVE_KEY_ID || '', secret: process.env.RAZORPAY_LIVE_KEY_SECRET || '' };
 }
 
-async function db() {
-  if (!configured()) throw new Error('Managed bookings are not configured');
+async function db({ adminPreflight = false } = {}) {
+  if (adminPreflight ? !hasMysqlConfig() : !configured()) throw new Error('Managed bookings are not configured');
   if (!testMode() && !sqliteForTests) {
     if (!mysqlReady) {
       mysqlReady = (async () => {
@@ -341,6 +341,9 @@ export async function handleManagedBooking(request) {
     if (!hasMysqlConfig()) return json({ error: 'Booking database settings are incomplete.' }, 503);
     try {
       await checkMysqlStorage();
+      // Exercise the same MySQL initialization used by live checkout while
+      // the public payment switch remains off. Only this admin route may do so.
+      await db({ adminPreflight: true });
       return json({ storage: 'ready', paymentsEnabled: process.env.SAHAAN_PAYMENTS_ENABLED === '1',
         liveReadinessIssues: liveReadinessIssues() });
     } catch (error) {

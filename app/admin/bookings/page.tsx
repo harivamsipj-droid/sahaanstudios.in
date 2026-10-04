@@ -51,7 +51,7 @@ export default function BookingDeskPage() {
     try {
       const data = await api<{ storage: string; paymentsEnabled: boolean; liveReadinessIssues: string[]; error?: string }>('/admin/storage-check');
       setMessage(data.storage === 'ready'
-        ? `Booking database read/write check passed. The probe was rolled back; no quote was created. ${data.liveReadinessIssues.length ? `Live setup still needs: ${data.liveReadinessIssues.join('; ')}.` : 'Live configuration checks passed; payments remain off until explicitly enabled.'}`
+        ? `Booking database write/read and startup checks passed. The probe was rolled back; no quote was created. ${data.liveReadinessIssues.length ? `Live setup still needs: ${data.liveReadinessIssues.join('; ')}.` : 'Live configuration checks passed; payments remain off until explicitly enabled.'}`
         : 'Booking database check did not pass.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not check booking storage'); }
   }
