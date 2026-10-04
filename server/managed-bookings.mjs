@@ -66,6 +66,25 @@ function hasMysqlConfig() {
     .every((name) => Boolean(process.env[name]));
 }
 
+function liveReadinessIssues() {
+  const issues = [];
+  if (process.env.SAHAAN_PAYMENT_TEST_MODE === '1') issues.push('Test mode is on');
+  if (process.env.SAHAAN_POLICY_APPROVED !== '1') issues.push('Payment policy is not approved');
+  if (!hasMysqlConfig()) issues.push('MySQL settings are incomplete');
+  if ((process.env.SAHAAN_ADMIN_TOKEN || '').length < 32) issues.push('Admin token is too short');
+  if (!(process.env.RAZORPAY_LIVE_KEY_ID || '').startsWith('rzp_live_')) issues.push('Live Razorpay key ID is missing');
+  if (!process.env.RAZORPAY_LIVE_KEY_SECRET) issues.push('Live Razorpay key secret is missing');
+  if ((process.env.RAZORPAY_LIVE_WEBHOOK_SECRET || '').length < 32) issues.push('Live webhook secret is missing or too short');
+  if (manualMode()) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(process.env.SAHAAN_MANUAL_PILOT_END || '')) issues.push('Manual pilot end date is missing');
+    else if (!manualPilotOpen()) issues.push('Manual pilot window has ended');
+  } else if (!process.env.META_WHATSAPP_TOKEN || !process.env.META_WHATSAPP_PHONE_NUMBER_ID
+    || !/^v[0-9]+\.[0-9]+$/.test(process.env.META_GRAPH_VERSION || '')
+    || !process.env.META_TEMPLATE_PAYMENT || !process.env.META_TEMPLATE_CUSTOMER_ASSIGNED
+    || !process.env.META_TEMPLATE_ARTIST_ASSIGNED) issues.push('Automatic WhatsApp settings are incomplete');
+  return issues;
+}
+
 async function checkMysqlStorage() {
   const { createConnection } = await import('mysql2/promise');
   const connection = await createConnection({
@@ -322,7 +341,8 @@ export async function handleManagedBooking(request) {
     if (!hasMysqlConfig()) return json({ error: 'Booking database settings are incomplete.' }, 503);
     try {
       await checkMysqlStorage();
-      return json({ storage: 'ready', paymentsEnabled: process.env.SAHAAN_PAYMENTS_ENABLED === '1' });
+      return json({ storage: 'ready', paymentsEnabled: process.env.SAHAAN_PAYMENTS_ENABLED === '1',
+        liveReadinessIssues: liveReadinessIssues() });
     } catch (error) {
       const code = typeof error?.code === 'string' && /^[A-Z0-9_]+$/.test(error.code) ? error.code : 'UNKNOWN';
       console.error('Booking storage check failed:', code);
