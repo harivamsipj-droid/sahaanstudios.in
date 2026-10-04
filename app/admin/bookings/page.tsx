@@ -49,9 +49,9 @@ export default function BookingDeskPage() {
 
   async function checkStorage() {
     try {
-      const data = await api<{ storage: string; paymentsEnabled: boolean; liveReadinessIssues: string[]; error?: string }>('/admin/storage-check');
+      const data = await api<{ storage: string; paymentsEnabled: boolean; razorpayConnection: string; liveReadinessIssues: string[]; error?: string }>('/admin/storage-check');
       setMessage(data.storage === 'ready'
-        ? `Booking database write/read and startup checks passed. The probe was rolled back; no quote was created. ${data.liveReadinessIssues.length ? `Live setup still needs: ${data.liveReadinessIssues.join('; ')}.` : 'Live configuration checks passed; payments remain off until explicitly enabled.'}`
+        ? `Booking database write/read and startup checks passed. The probe was rolled back; no quote was created. ${data.liveReadinessIssues.length ? `Live setup still needs: ${data.liveReadinessIssues.join('; ')}.` : data.razorpayConnection === 'ready' ? 'Live Razorpay key pair authenticated. Payments remain off until explicitly enabled.' : 'Razorpay key pair was not checked.'}`
         : 'Booking database check did not pass.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not check booking storage'); }
   }

@@ -114,6 +114,18 @@ async function checkMysqlStorage() {
   }
 }
 
+async function checkLiveRazorpayCredentials() {
+  const { id, secret } = razorpayCredentials();
+  const auth = Buffer.from(`${id}:${secret}`).toString('base64');
+  const response = await fetch('https://api.razorpay.com/v1/orders?count=1', {
+    headers: { authorization: `Basic ${auth}` },
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!response.ok) throw Object.assign(new Error('Live Razorpay authentication failed'),
+    { code: `HTTP_${response.status}` });
+  await response.body?.cancel();
+}
+
 function testMode() {
   return process.env.SAHAAN_PAYMENT_TEST_MODE === '1' && (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_');
 }
@@ -339,17 +351,23 @@ export async function handleManagedBooking(request) {
     }
     if (!sameOrigin(request)) return json({ error: 'Origin not allowed' }, 403);
     if (!hasMysqlConfig()) return json({ error: 'Booking database settings are incomplete.' }, 503);
+    let stage = 'database';
     try {
       await checkMysqlStorage();
       // Exercise the same MySQL initialization used by live checkout while
       // the public payment switch remains off. Only this admin route may do so.
       await db({ adminPreflight: true });
+      const issues = liveReadinessIssues();
+      if (issues.length === 0) {
+        stage = 'Razorpay';
+        await checkLiveRazorpayCredentials();
+      }
       return json({ storage: 'ready', paymentsEnabled: process.env.SAHAAN_PAYMENTS_ENABLED === '1',
-        liveReadinessIssues: liveReadinessIssues() });
+        razorpayConnection: issues.length ? 'not_checked' : 'ready', liveReadinessIssues: issues });
     } catch (error) {
       const code = typeof error?.code === 'string' && /^[A-Z0-9_]+$/.test(error.code) ? error.code : 'UNKNOWN';
-      console.error('Booking storage check failed:', code);
-      return json({ error: `Booking database check failed (${code}).` }, 503);
+      console.error(`Booking ${stage} preflight failed:`, code);
+      return json({ error: `${stage === 'Razorpay' ? 'Live Razorpay key' : 'Booking database'} check failed (${code}).` }, 503);
     }
   }
   if (path === '/health' && request.method === 'GET') {
