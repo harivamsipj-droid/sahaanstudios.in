@@ -4,9 +4,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Clock3, MessageCircle, ShieldCheck } from 'lucide-react';
 import { sahaanWhatsAppUrl } from '@/lib/contact';
 import { customerServices } from '@/lib/services';
+import { todayInHyderabad } from '@/lib/date';
 
 const windows = ['9:00 am–12:00 pm', '12:00 pm–3:00 pm', '3:00 pm–6:00 pm', '6:00 pm–9:00 pm'];
-const todayInHyderabad = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 export default function RequestPage() {
   const [service, setService] = useState<string>(customerServices[0].name);

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { SAHAAN_WHATSAPP_DISPLAY, sahaanWhatsAppUrl } from '@/lib/contact';
 import { getCustomerPosition } from '@/lib/customer-location';
 import { customerServices } from '@/lib/services';
+import { todayInHyderabad } from '@/lib/date';
 
 const services = customerServices.map((item) => item.name);
 
@@ -83,7 +84,7 @@ export default function HomePage() {
           <div className="location-choice"><MapPin size={19} /><div><strong>{manualArea ? 'Search a different area' : 'Find beauty near me'}</strong><small>{manualArea ? 'Enter a Hyderabad PIN code below' : 'Your browser will ask to use your location'}</small></div><button type="button" onClick={() => { setManualArea((value) => !value); setLocationError(''); }}>{manualArea ? 'Use my location' : 'Use PIN instead'}</button></div>
           {manualArea && <label className="manual-pin-field"><span className="field-title"><MapPin size={15} /> Hyderabad PIN code <b>Required</b></span><Input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={pinCode} onChange={(e) => setPinCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="e.g. 500034" aria-describedby="location-help" /><small id="location-help">Any six-digit PIN code in Hyderabad</small></label>}
           <label className="service-select-field"><span className="field-title"><Sparkles size={15} /> Service <b>Required</b></span><div className="native-select"><select required aria-label="Choose a service" value={service} onChange={(e) => setService(e.target.value)}>{services.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} /></div><small>Choose the treatment you need</small></label>
-          <label className="preferred-date-field"><span className="field-title"><CalendarDays size={15} /> Preferred date <i>Optional</i></span><Input value={date} onChange={(e) => setDate(e.target.value)} type="date" min={new Date().toISOString().split('T')[0]} /><small>We’ll confirm the appointment time later</small></label>
+          <label className="preferred-date-field"><span className="field-title"><CalendarDays size={15} /> Preferred date <i>Optional</i></span><Input value={date} onChange={(e) => setDate(e.target.value)} type="date" min={todayInHyderabad()} /><small>We’ll confirm the appointment time later</small></label>
           <Button type="submit" className="find-button" disabled={locating}><Search /> {locating ? 'Finding your location…' : manualArea ? 'Explore this area' : 'Show nearby professionals'}</Button>
         </form>
         {locationError && <p className="location-error" role="alert">{locationError} <button type="button" onClick={() => setManualArea(true)}>Search by PIN code</button></p>}
